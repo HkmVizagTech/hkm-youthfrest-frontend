@@ -92,7 +92,7 @@ const CollegeManager = () => {
     <Layout>
       <Center minH="100vh" px={0}>
         <Box
-          w={{ base: "100vw", md: "90%", lg: "740px" }}
+          w={{ base: "90vw", md: "90%", lg: "740px" }}
           maxW="100vw"
           mx="auto"
           mt={{ base: 2, md: 10 }}
