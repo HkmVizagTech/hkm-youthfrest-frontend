@@ -14,7 +14,6 @@ import {
   Divider,
   useColorModeValue,
   Center,
-  VisuallyHidden,
 } from '@chakra-ui/react';
 import { EditIcon, DeleteIcon, CheckCircleIcon, PlusSquareIcon } from '@chakra-ui/icons';
 import { FaUniversity } from 'react-icons/fa';
@@ -83,27 +82,25 @@ const CollegeManager = () => {
 
   useEffect(() => {
     fetchColleges();
-   
   }, []);
 
-  
   const cardBg = useColorModeValue("white", "gray.800");
   const cardBorder = useColorModeValue("gray.200", "gray.600");
   const sectionBg = useColorModeValue("gray.50", "gray.700");
 
   return (
     <Layout>
-      <Center minH="100vh" px={2}>
+      <Center minH="100vh" px={0}>
         <Box
-          w="100%"
-          maxW="740px"
+          w={{ base: "100vw", md: "90%", lg: "740px" }}
+          maxW="100vw"
           mx="auto"
-          mt={10}
-          p={{ base: 4, md: 8 }}
+          mt={{ base: 2, md: 10 }}
+          p={{ base: 2, md: 8 }}
           bg={cardBg}
           borderWidth={1}
           borderColor={cardBorder}
-          borderRadius="2xl"
+          borderRadius={{ base: "none", md: "2xl" }}
           boxShadow="lg"
         >
           <Flex align="center" justify="center" direction="column" mb={6}>
@@ -123,6 +120,7 @@ const CollegeManager = () => {
             mb={6}
             border="1px"
             borderColor={cardBorder}
+            w="100%"
           >
             <Input
               placeholder="Enter College Name"
@@ -136,6 +134,7 @@ const CollegeManager = () => {
               borderRadius="md"
               border="1px solid"
               borderColor={cardBorder}
+              w="100%"
             />
             <Button
               colorScheme={editingId ? "gray" : "teal"}
@@ -147,6 +146,7 @@ const CollegeManager = () => {
               disabled={loading || !name.trim()}
               shadow="sm"
               borderRadius="md"
+              w="100%"
             >
               {editingId ? 'Update College' : 'Add College'}
             </Button>
@@ -158,6 +158,7 @@ const CollegeManager = () => {
                 size="sm"
                 borderRadius="md"
                 shadow="none"
+                w="100%"
               >
                 Cancel Edit
               </Button>
@@ -184,6 +185,8 @@ const CollegeManager = () => {
                   transition="all 0.2s"
                   _hover={{ shadow: "md", borderColor: "teal.300" }}
                   minWidth={0}
+                  w="100%"
+                  flexWrap="wrap"
                 >
                   <HStack minWidth={0} flex="1">
                     <Text
