@@ -87,7 +87,8 @@ const AttendanceList = () => {
         College: row.college,
         Branch: row.branch,
         Phone: row.whatsappNumber,
-        "Attendance": row.attendance ? "Yes" : "No",
+        Slot: row.slot,
+        Attendance: row.attendance ? "Yes" : "No",
         "Attendance Date": row.attendanceDate
           ? new Date(row.attendanceDate).toLocaleString()
           : "",
@@ -214,6 +215,7 @@ const AttendanceList = () => {
                 <Th>Branch</Th>
                 <Th>Email</Th>
                 <Th>Attendance</Th>
+                <Th>Slot</Th>
                 <Th>Attendance Date</Th>
                 <Th>Registration Date</Th>
               </Tr>
@@ -255,8 +257,19 @@ const AttendanceList = () => {
                     )}
                   </Td>
                   <Td>
+                    {candidate.slot ? (
+                      <Tag colorScheme="teal" fontWeight="bold" fontSize="sm" px={2}>
+                        {candidate.slot}
+                      </Tag>
+                    ) : (
+                      <Tag colorScheme="gray" fontSize="sm" px={2}>
+                        N/A
+                      </Tag>
+                    )}
+                  </Td>
+                  <Td>
                     {candidate.attendanceDate
-                      ? new Date(candidate.attendanceDate).toLocaleDateString()
+                      ? new Date(candidate.attendanceDate).toLocaleString()
                       : "-"}
                   </Td>
                   <Td>
@@ -268,7 +281,7 @@ const AttendanceList = () => {
               ))}
               {filteredData.length === 0 && (
                 <Tr>
-                  <Td colSpan={10}>
+                  <Td colSpan={11}>
                     <Text color="gray.400" textAlign="center" py={10}>
                       No attendance records found.
                     </Text>

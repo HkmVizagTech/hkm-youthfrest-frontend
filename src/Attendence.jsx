@@ -26,6 +26,7 @@ const Attendence = () => {
   const [loading, setLoading] = useState(false);
   const [successName, setSuccessName] = useState("");
   const [attendanceToken, setAttendanceToken] = useState("");
+  const [attendanceDate, setAttendanceDate] = useState(""); 
   const [notFound, setNotFound] = useState(false); 
   const toast = useToast();
 
@@ -33,6 +34,7 @@ const Attendence = () => {
     setError("");
     setSuccessName("");
     setAttendanceToken("");
+    setAttendanceDate(""); 
     setNotFound(false); 
     const trimmedPhone = phone.trim().replace(/\D/g, "");
 
@@ -55,6 +57,7 @@ const Attendence = () => {
         if ((data.status === "already-marked" || data.status === "success") && data.attendanceToken) {
           setAttendanceToken(data.attendanceToken);
           setSuccessName(data.name || "");
+          setAttendanceDate(data.attendanceDate || ""); 
         }
 
         if (data.status === "already-marked") {
@@ -77,7 +80,6 @@ const Attendence = () => {
           setPhone("");
         }
       } else {
-      
         if (
           data?.message?.toLowerCase().includes("not found") ||
           data?.message?.toLowerCase().includes("no user")
@@ -103,6 +105,12 @@ const Attendence = () => {
       });
     }
     setLoading(false);
+  };
+
+  const formatDate = (isoString) => {
+    if (!isoString) return "";
+    const d = new Date(isoString);
+    return d.toLocaleString(); 
   };
 
   return (
@@ -173,7 +181,6 @@ const Attendence = () => {
           </Button>
         </form>
 
-       
         <Fade in={notFound}>
           {notFound && (
             <Box mt={6} p={4} borderRadius="lg" bg="orange.50" border="1px solid" borderColor="orange.200" textAlign="left">
@@ -210,7 +217,12 @@ const Attendence = () => {
                   </Text>
                 </>
               )}
-              <Text fontSize="lg" color="teal.700" mb={2}>
+              {attendanceDate && (
+                <Text fontSize="md" color="gray.700" mt={2}>
+                  Attendance marked on: <b>{formatDate(attendanceDate)}</b>
+                </Text>
+              )}
+              <Text fontSize="lg" color="teal.700" mb={2} mt={2}>
                 Show this QR at Reporting Counter and Collect Entry Band
               </Text>
               <Box display="flex" justifyContent="center" alignItems="center">
@@ -225,7 +237,6 @@ const Attendence = () => {
                 borderRadius="full"
                 objectFit="cover"
               />
-           
               <Text mt={4} fontSize="md" fontWeight="bold" color="teal.600">
                 Please visit the admin counter.
               </Text>
