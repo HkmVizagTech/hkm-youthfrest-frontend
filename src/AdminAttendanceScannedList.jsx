@@ -8,7 +8,6 @@ import {
   Tr,
   Th,
   Td,
-  Button,
   Spinner,
   Input,
   Flex,
@@ -20,9 +19,8 @@ import {
   HStack,
   Badge,
   Select,
-  chakra,
 } from "@chakra-ui/react";
-import { CheckCircleIcon, WarningIcon, TimeIcon, DownloadIcon, PhoneIcon } from "@chakra-ui/icons";
+import { CheckCircleIcon, PhoneIcon } from "@chakra-ui/icons";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useNavigate } from "react-router-dom";
@@ -35,10 +33,13 @@ const AdminAttendanceScannedList = () => {
   const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [timeFilter, setTimeFilter] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users/admin/scanned-list")
+    fetch(
+      "https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users/admin/scanned-list"
+    )
       .then((res) => res.json())
       .then((records) => {
         setData(records);
@@ -55,7 +56,9 @@ const AdminAttendanceScannedList = () => {
     if (!candidate.adminAttendanceDate) return false;
     const candidateDate = new Date(candidate.adminAttendanceDate);
     const start = startDate ? new Date(startDate) : null;
-    const end = endDate ? new Date(new Date(endDate).setHours(23, 59, 59, 999)) : null;
+    const end = endDate
+      ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
+      : null;
     if (start && candidateDate < start) return false;
     if (end && candidateDate > end) return false;
     return true;
@@ -64,16 +67,36 @@ const AdminAttendanceScannedList = () => {
   const filteredData = data.filter((c) => {
     const collegeMatch = filteredCollege ? c.college === filteredCollege : true;
     const dateMatch = filterByDate(c);
+
     const searchMatch =
       search.length < 2 ||
       [c.name, c.email, c.phone, c.college, c.branch]
+        .map((v) => (v && v !== "-" ? v : ""))
         .join(" ")
         .toLowerCase()
         .includes(search.toLowerCase());
-    return collegeMatch && dateMatch && searchMatch;
+
+    const timeMatch = (() => {
+      if (!timeFilter || !c.adminAttendanceDate) return true;
+
+      const dateObj = new Date(c.adminAttendanceDate);
+      const recordDateStr = dateObj.toISOString().split("T")[0];
+      const targetDateStr = startDate || "";
+
+      if (targetDateStr && recordDateStr !== targetDateStr) return true;
+
+      const hours = dateObj.getHours();
+      if (timeFilter === "morning") return hours >= 8 && hours < 16;
+      if (timeFilter === "evening") return hours >= 16;
+      return true;
+    })();
+
+    return collegeMatch && dateMatch && searchMatch && timeMatch;
   });
 
-  const uniqueColleges = [...new Set(data.map((c) => c.college).filter(Boolean))];
+  const uniqueColleges = [
+    ...new Set(data.map((c) => c.college).filter(Boolean)),
+  ];
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
@@ -119,14 +142,6 @@ const AdminAttendanceScannedList = () => {
           <Heading size="lg" color="teal.700">
             Admin Scanned Attendance List
           </Heading>
-          {/* <Button
-            colorScheme="teal"
-            variant="outline"
-            leftIcon={<TimeIcon />}
-            onClick={() => navigate("/admin/attendance")}
-          >
-            Go to Attendance Scan
-          </Button> */}
         </Flex>
 
         <Box
@@ -138,7 +153,7 @@ const AdminAttendanceScannedList = () => {
           borderRadius="md"
           boxShadow="sm"
         >
-          <Flex gap={4} align="flex-end" wrap="nowrap" minW="600px">
+          <Flex gap={4} align="flex-end" wrap="nowrap" minW="850px">
             <FormControl w="180px">
               <FormLabel fontSize="sm">College</FormLabel>
               <Select
@@ -155,6 +170,7 @@ const AdminAttendanceScannedList = () => {
                 ))}
               </Select>
             </FormControl>
+
             <FormControl w="150px">
               <FormLabel fontSize="sm">From</FormLabel>
               <Input
@@ -165,6 +181,7 @@ const AdminAttendanceScannedList = () => {
                 size="sm"
               />
             </FormControl>
+
             <FormControl w="150px">
               <FormLabel fontSize="sm">To</FormLabel>
               <Input
@@ -175,6 +192,7 @@ const AdminAttendanceScannedList = () => {
                 size="sm"
               />
             </FormControl>
+
             <FormControl w="220px">
               <FormLabel fontSize="sm">Search</FormLabel>
               <Input
@@ -185,16 +203,20 @@ const AdminAttendanceScannedList = () => {
                 size="sm"
               />
             </FormControl>
-            {/* <Button
-              colorScheme="teal"
-              leftIcon={<DownloadIcon />}
-              onClick={exportToExcel}
-              variant="solid"
-              size="sm"
-              minW="140px"
-            >
-              Export to Excel
-            </Button> */}
+
+            <FormControl w="150px">
+              <FormLabel fontSize="sm">Time of Day</FormLabel>
+              <Select
+                placeholder="All"
+                value={timeFilter}
+                onChange={(e) => setTimeFilter(e.target.value)}
+                bg="gray.50"
+                size="sm"
+              >
+                <option value="morning">Morning</option>
+                <option value="evening">Evening</option>
+              </Select>
+            </FormControl>
           </Flex>
         </Box>
 
@@ -233,7 +255,7 @@ const AdminAttendanceScannedList = () => {
                       </Text>
                     </Tooltip>
                   </Td>
-                  <Td>{candidate.gender || "-"}</Td>
+                  <Td>{candidate.gender || ""}</Td>
                   <Td>
                     <Tooltip label={candidate.phone} fontSize="xs">
                       <HStack spacing={1}>
@@ -245,13 +267,15 @@ const AdminAttendanceScannedList = () => {
                     </Tooltip>
                   </Td>
                   <Td>
-                    <Text fontSize="sm">{candidate.college || "-"}</Text>
+                    <Text fontSize="sm">{candidate.college || ""}</Text>
                   </Td>
-                  <Td>{candidate.branch || "-"}</Td>
+                  <Td>{candidate.branch || ""}</Td>
                   <Td>
                     {candidate.adminAttendanceDate
-                      ? new Date(candidate.adminAttendanceDate).toLocaleString()
-                      : "-"}
+                      ? new Date(
+                          candidate.adminAttendanceDate
+                        ).toLocaleDateString()
+                      : ""}
                   </Td>
                   <Td>
                     <Tag colorScheme="green" size="sm">

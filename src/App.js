@@ -46,9 +46,7 @@ function App() {
         </ProtectedRoute>
       }/>
       <Route path='/thankyou/:id' element={
-        <ProtectedRoute allowedRoles={["admin"]}>
-          <ThankYou />
-        </ProtectedRoute>
+       <ThankYou />
       }/>
       <Route path='/attendance' element={<Attendence/>}/>
       <Route path='/admin' element={
