@@ -23,12 +23,13 @@ import Login from './Login';
 import Register from './Register';
 import ProtectedRoute from './component/ProtectedRoute';
 import FestivalNotice from './component/FestivalNotice';
-
+import SendCertificate from './component/sendCertificate';
 function App() {
   return (
     <ChakraProvider theme={theme}>
       <Routes>
       <Route path='/' element={<FestivalNotice/>}/>
+  <Route path='/send' element={<SendCertificate/>}/>
       <Route path='/admin/adminqrscanner' element={
         <ProtectedRoute allowedRoles={["user", "admin"]}>
           <AdminQrScanner/>
