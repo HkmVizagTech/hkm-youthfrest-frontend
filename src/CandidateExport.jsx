@@ -49,18 +49,19 @@ const CandidateExport = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch("https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users")
-      .then((res) => res.json())
-      .then((candidates) => {
-        setData(candidates);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch data", err);
-        setLoading(false);
-      });
-  }, []);
+useEffect(() => {
+  fetch("https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users")
+    .then((res) => res.json())
+    .then((resData) => {
+      // ✅ Extract the candidates array
+      setData(resData.candidates || []);
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.error("Failed to fetch data", err);
+      setLoading(false);
+    });
+}, []);
 
   const filterByDate = (candidate) => {
     if (!startDate && !endDate) return true;
