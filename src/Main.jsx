@@ -341,43 +341,46 @@ const Main = () => {
             </Text>
           </Box>
 
-          <Box
-            className="kp-float"
-            mx="auto"
-            mb={6}
-            boxSize={{ base: "104px", md: "120px" }}
-            borderRadius="full"
-            overflow="hidden"
-            border="4px solid white"
-            boxShadow="0 12px 30px -10px rgba(242,71,139,0.4)"
-          >
-            <Image src={image12} alt="Krishna Pulse" objectFit="cover" w="100%" h="100%" />
-          </Box>
-
-          <Heading
-            as="h1"
-            fontWeight={800}
-            lineHeight={0.92}
-            letterSpacing="-0.025em"
-            color="night.800"
-            fontSize={{ base: "6xl", md: "8xl" }}
-          >
-            Krishna{" "}
-            <Box as="span" bgGradient="linear(to-r, saffron.500, lotus.500)" bgClip="text">
-              Pulse
+          <Flex align="center" justify="center" gap={{ base: 4, md: 6 }} mb={4} flexWrap="nowrap">
+            <Box
+              className="kp-float"
+              flexShrink={0}
+              boxSize={{ base: "78px", md: "112px" }}
+              borderRadius="full"
+              overflow="hidden"
+              border="4px solid white"
+              boxShadow="0 12px 30px -10px rgba(242,71,139,0.4)"
+            >
+              <Image src={image12} alt="Krishna Pulse" objectFit="cover" w="100%" h="100%" />
             </Box>
-          </Heading>
-          <Text
-            mt={2}
-            fontWeight={700}
-            letterSpacing="0.2em"
-            textTransform="uppercase"
-            color="night.400"
-            fontSize={{ base: "sm", md: "md" }}
-          >
-            Youth Festival
-          </Text>
-          <Text mt={4} color="night.600" fontSize={{ base: "lg", md: "xl" }} fontWeight={500}>
+
+            <Box textAlign="left">
+              <Heading
+                as="h1"
+                fontWeight={800}
+                lineHeight={0.9}
+                letterSpacing="-0.025em"
+                color="night.800"
+                fontSize={{ base: "4xl", md: "7xl" }}
+              >
+                Krishna{" "}
+                <Box as="span" bgGradient="linear(to-r, saffron.500, lotus.500)" bgClip="text">
+                  Pulse
+                </Box>
+              </Heading>
+              <Text
+                fontWeight={700}
+                letterSpacing="0.2em"
+                textTransform="uppercase"
+                color="night.400"
+                fontSize={{ base: "10px", md: "md" }}
+              >
+                Youth Festival
+              </Text>
+            </Box>
+          </Flex>
+
+          <Text mt={2} color="night.600" fontSize={{ base: "lg", md: "xl" }} fontWeight={500}>
             A Fest of Fun, Faith &amp; Freedom
           </Text>
 
