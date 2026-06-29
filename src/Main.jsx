@@ -606,6 +606,46 @@ const Main = () => {
             </VStack>
           </Box>
         </Box>
+
+        {/* cross-promo: Bhajan Clubbing */}
+        <Flex
+          mt={6}
+          align="center"
+          gap={4}
+          bg="white"
+          borderRadius="2xl"
+          px={5}
+          py={4}
+          boxShadow="0 10px 30px -20px rgba(0,0,0,0.5)"
+          border="1px solid"
+          borderColor="blackAlpha.50"
+        >
+          <Flex align="center" justify="center" boxSize="44px" borderRadius="full" bg="night.800" flexShrink={0}>
+            <Text fontSize="xl">🎵</Text>
+          </Flex>
+          <Box flex={1}>
+            <Text fontSize="xs" fontWeight={700} color="night.400" textTransform="uppercase" letterSpacing="0.1em">
+              Also in Vizag
+            </Text>
+            <Text fontSize="sm" fontWeight={700} color="night.800" lineHeight={1.3}>
+              Bhajan Clubbing — a live kirtan night
+            </Text>
+          </Box>
+          <Button
+            as="a"
+            href="https://bhajan.harekrishnavizag.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            size="sm"
+            flexShrink={0}
+            variant="outline"
+            borderColor="peacock.300"
+            color="peacock.700"
+            _hover={{ bg: "peacock.50" }}
+          >
+            Explore ↗
+          </Button>
+        </Flex>
       </Container>
     </Box>
   );
