@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import image12 from './component/image.png'
+import image12 from "./component/image.png";
 import {
   Box,
   Button,
@@ -16,17 +16,13 @@ import {
   Select as ChakraSelect,
   Text,
   Container,
-  Card,
-  CardBody,
-  CardHeader,
   Stack,
   InputGroup,
-  Icon,
   InputLeftAddon,
   Image,
   Flex,
+  SimpleGrid,
 } from "@chakra-ui/react";
-import { CalendarIcon, TimeIcon, StarIcon } from "@chakra-ui/icons";
 import Select from "react-select";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -49,23 +45,21 @@ const initialState = {
 
 const slotOptions = [
   { value: "Morning", label: "Morning (11AM - 1PM)" },
-  { value: "Evening", label: "Evening (5PM - 7PM)" }
+  { value: "Evening", label: "Evening (5PM - 7PM)" },
 ];
 
-
-const RAZORPAY_KEY =  "rzp_live_HBAc3tlMK0X5Xd";
-const API_BASE =  "https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users";
-
+const RAZORPAY_KEY = "rzp_live_HBAc3tlMK0X5Xd";
+const API_BASE =
+  "https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users";
 
 const Main = () => {
   const toast = useToast();
   const navigate = useNavigate();
   const [collegeOptions, setCollegeOptions] = useState([]);
   const [formData, setFormData] = useState(initialState);
-  const [otherCollege, setOtherCollege] = useState(""); 
+  const [otherCollege, setOtherCollege] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   useEffect(() => {
     if (!window.Razorpay) {
@@ -134,19 +128,24 @@ const Main = () => {
       newErrors.whatsappNumber = "Enter a valid 10-digit number";
     }
     if (!email) newErrors.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = "Enter a valid email";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      newErrors.email = "Enter a valid email";
     if (!gender) newErrors.gender = "Please select gender";
-    if (!collegeOrWorking)
-      newErrors.collegeOrWorking = "Please select one option";
+    if (!collegeOrWorking) newErrors.collegeOrWorking = "Please select one option";
     if (collegeOrWorking === "Working" && !companyName.trim())
       newErrors.companyName = "Company name is required";
-    if (collegeOrWorking === "College" && !college.trim()) newErrors.college = "College name is required";
-    if (collegeOrWorking === "College" && college === "Other College" && !otherCollege.trim()) {
+    if (collegeOrWorking === "College" && !college.trim())
+      newErrors.college = "College name is required";
+    if (
+      collegeOrWorking === "College" &&
+      college === "Other College" &&
+      !otherCollege.trim()
+    ) {
       newErrors.college = "Please enter your college name";
     }
-    if (collegeOrWorking === "College" && !course.trim()) newErrors.course = "Course is required";
-    if (collegeOrWorking === "College" && !year)
-      newErrors.year = "Year is required";
+    if (collegeOrWorking === "College" && !course.trim())
+      newErrors.course = "Course is required";
+    if (collegeOrWorking === "College" && !year) newErrors.year = "Year is required";
     if (!slot) newErrors.slot = "Please select your slot";
 
     setErrors(newErrors);
@@ -157,7 +156,8 @@ const Main = () => {
     const finalFormData = {
       ...formData,
       college:
-        formData.collegeOrWorking === "College" && formData.college === "Other College"
+        formData.collegeOrWorking === "College" &&
+        formData.college === "Other College"
           ? otherCollege
           : formData.college,
     };
@@ -165,19 +165,14 @@ const Main = () => {
     if (!validateForm()) return;
     setIsSubmitting(true);
     try {
-
       // Amount in paise for Razorpay
-
       const amountInPaise = 49 * 100;
 
-      const orderRes = await fetch(
-        `${API_BASE}/create-order`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: amountInPaise, formData: finalFormData }),
-        }
-      );
+      const orderRes = await fetch(`${API_BASE}/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: amountInPaise, formData: finalFormData }),
+      });
       const orderData = await orderRes.json();
       if (!orderData.id) throw new Error("Order creation failed");
 
@@ -190,29 +185,26 @@ const Main = () => {
         order_id: orderData.id,
         handler: async (response) => {
           try {
-            const verifyRes = await fetch(
-              `${API_BASE}/verify-payment`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_signature: response.razorpay_signature,
-                  formData: {
-                    ...finalFormData,
-                    paymentMethod: "Online",
-                    receipt: `receipt_${Date.now()}`,
-                  },
-                }),
-              }
-            );
+            const verifyRes = await fetch(`${API_BASE}/verify-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                formData: {
+                  ...finalFormData,
+                  paymentMethod: "Online",
+                  receipt: `receipt_${Date.now()}`,
+                },
+              }),
+            });
             const result = await verifyRes.json();
 
-
-
-           if (result.message === "success" || result.message === "Already Registered") {
-
+            if (
+              result.message === "success" ||
+              result.message === "Already Registered"
+            ) {
               toast({
                 title: "Registration Successful!",
                 description: "Your registration is confirmed.",
@@ -242,16 +234,19 @@ const Main = () => {
           email: finalFormData.email,
           contact: `91${finalFormData.whatsappNumber}`,
         },
-        theme: { color: "#0a9396" },
+        theme: { color: "#0FB6A6" },
         modal: {
-          ondismiss: () => setIsSubmitting(false)
-        }
+          ondismiss: () => setIsSubmitting(false),
+        },
       };
       const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', function (response){
+      rzp.on("payment.failed", function (response) {
         toast({
           title: "Payment failed",
-          description: response.error && response.error.description ? response.error.description : "Try again later",
+          description:
+            response.error && response.error.description
+              ? response.error.description
+              : "Try again later",
           status: "error",
           duration: 5000,
           isClosable: true,
@@ -272,189 +267,364 @@ const Main = () => {
   };
 
   const customSelectStyles = {
-    control: (base) => ({
+    control: (base, state) => ({
       ...base,
-      borderColor: "#E2E8F0",
-      borderWidth: "2px",
-      borderRadius: "6px",
-      minHeight: "40px",
-      boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-      "&:hover": { borderColor: "#CBD5E0" },
+      borderColor: state.isFocused ? "#0FB6A6" : "rgba(0,0,0,0.12)",
+      borderWidth: "1.5px",
+      borderRadius: "8px",
+      minHeight: "44px",
+      boxShadow: state.isFocused ? "0 0 0 3px rgba(15,182,166,0.25)" : "none",
+      "&:hover": { borderColor: "#4CD9CB" },
     }),
     option: (base, state) => ({
       ...base,
       backgroundColor: state.isSelected
-        ? "#3182CE"
+        ? "#0FB6A6"
         : state.isFocused
-        ? "#EBF8FF"
+        ? "#E5FBF8"
         : "white",
-      color: state.isSelected ? "white" : "#2D3748",
+      color: state.isSelected ? "white" : "#221C33",
     }),
+    menu: (base) => ({ ...base, zIndex: 20 }),
   };
 
+  const facts = [
+    { label: "Cultural Events", icon: "🎭" },
+    { label: "Youth Connect", icon: "🫶" },
+    { label: "2-Hour Experience", icon: "⏱️" },
+    { label: "Entry ₹49", icon: "🎟️" },
+  ];
+
   return (
-    <Box minH="100vh" bg="gray.50" py={8}>
-      <Container maxW="2xl" px={4}>
-       
-        <Flex
-          direction="row"
-          align="center"
-          justify="center"
-          gap={6}
-          mb={8}
-          textAlign="left"
-          flexWrap="wrap"
-        >
-  
+    <Box bg="night.900" minH="100vh">
+      {/* ── Hero ─────────────────────────────────────────── */}
+      <Box
+        position="relative"
+        overflow="hidden"
+        bgGradient="linear(to-b, night.800, night.900)"
+        pt={{ base: 12, md: 16 }}
+        pb={{ base: 24, md: 28 }}
+        px={4}
+      >
+        {/* peacock-eye glow blobs */}
+        <Box
+          className="kp-blob"
+          position="absolute"
+          top="-80px"
+          left="-60px"
+          w="320px"
+          h="320px"
+          bgGradient="radial(peacock.400, transparent 70%)"
+          filter="blur(20px)"
+          opacity={0.5}
+          pointerEvents="none"
+        />
+        <Box
+          className="kp-blob"
+          position="absolute"
+          bottom="-40px"
+          right="-50px"
+          w="300px"
+          h="300px"
+          bgGradient="radial(lotus.400, transparent 70%)"
+          filter="blur(20px)"
+          opacity={0.45}
+          pointerEvents="none"
+        />
+
+        <Container maxW="3xl" position="relative" textAlign="center">
+          <Text
+            fontSize="xs"
+            letterSpacing="0.32em"
+            fontWeight={700}
+            color="peacock.300"
+            textTransform="uppercase"
+            mb={6}
+          >
+            Hare Krishna Movement · Visakhapatnam
+          </Text>
+
           <Box
-            boxSize={{ base: '120px', md: '150px' }}
+            className="kp-float"
+            mx="auto"
+            mb={6}
+            boxSize={{ base: "104px", md: "120px" }}
             borderRadius="full"
             overflow="hidden"
-            shadow="md"
-            border="2px solid #ccc"
-            flexShrink={0}
+            border="3px solid"
+            borderColor="marigold.400"
+            boxShadow="0 0 40px -8px rgba(255,176,32,0.6)"
           >
             <Image
               src={image12}
-              alt="Krishna Pulse Logo"
+              alt="Krishna Pulse"
               objectFit="cover"
-              width="100%"
-              height="100%"
+              w="100%"
+              h="100%"
             />
           </Box>
 
-          <Box>
-            <Heading fontSize={{ base: '2xl', md: '3xl' }} color="black" fontWeight="bold">
-              KRISHNA PULSE  <br /> YOUTH FESTIVAL
+          <Heading
+            as="h1"
+            fontWeight={800}
+            lineHeight={0.95}
+            letterSpacing="-0.02em"
+            color="white"
+            fontSize={{ base: "5xl", md: "7xl" }}
+          >
+            Krishna{" "}
+            <Box
+              as="span"
+              bgGradient="linear(to-r, marigold.400, saffron.500, lotus.400)"
+              bgClip="text"
+            >
+              Pulse
+            </Box>
+          </Heading>
+          <Text
+            mt={2}
+            fontWeight={700}
+            letterSpacing="0.18em"
+            textTransform="uppercase"
+            color="whiteAlpha.800"
+            fontSize={{ base: "sm", md: "md" }}
+          >
+            Youth Festival
+          </Text>
+          <Text mt={4} color="whiteAlpha.700" fontSize={{ base: "md", md: "lg" }}>
+            A Fest of Fun, Faith &amp; Freedom
+          </Text>
+
+          {/* signature pulse waveform */}
+          <Box mt={8} mx="auto" maxW="520px" opacity={0.9}>
+            <svg
+              className="kp-pulse-line"
+              viewBox="0 0 520 60"
+              fill="none"
+              width="100%"
+              height="48"
+              aria-hidden="true"
+            >
+              <path
+                d="M0 30 H120 l12 -22 l14 44 l12 -34 l10 22 H300 l14 -28 l12 44 l10 -28 H520"
+                stroke="url(#kpgrad)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <defs>
+                <linearGradient id="kpgrad" x1="0" y1="0" x2="520" y2="0">
+                  <stop offset="0" stopColor="#0FB6A6" />
+                  <stop offset="0.5" stopColor="#FFB020" />
+                  <stop offset="1" stopColor="#F2478B" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* ── Registration pass ────────────────────────────── */}
+      <Container maxW="2xl" px={4} pb={16} mt={{ base: -16, md: -20 }}>
+        {/* fact strip */}
+        <SimpleGrid
+          columns={{ base: 2, md: 4 }}
+          spacing={3}
+          mb={6}
+          position="relative"
+          zIndex={1}
+        >
+          {facts.map((f) => (
+            <VStack
+              key={f.label}
+              bg="whiteAlpha.900"
+              backdropFilter="blur(6px)"
+              borderRadius="xl"
+              py={3}
+              spacing={1}
+              boxShadow="0 8px 24px -16px rgba(0,0,0,0.6)"
+            >
+              <Text fontSize="xl">{f.icon}</Text>
+              <Text fontSize="xs" fontWeight={700} color="night.700">
+                {f.label}
+              </Text>
+            </VStack>
+          ))}
+        </SimpleGrid>
+
+        <Box
+          bg="cream"
+          borderRadius="2xl"
+          overflow="hidden"
+          boxShadow="0 30px 60px -25px rgba(12,9,33,0.7)"
+        >
+          {/* pass top accent */}
+          <Box h="6px" bgGradient="linear(to-r, peacock.500, marigold.400, lotus.400)" />
+
+          <Box px={{ base: 6, md: 10 }} pt={8} pb={4} textAlign="center">
+            <Heading size="lg" color="night.800" letterSpacing="-0.01em">
+              Claim your pass
             </Heading>
-            <Text fontSize={{ base: 'md', md: 'lg' }} color="gray.700" fontWeight="semibold" mt={2}>
-              A Fest of Fun, Faith & Freedom
+            <Text color="night.500" mt={2} fontSize="sm">
+              <Text as="span" color="lotus.500">
+                *
+              </Text>{" "}
+              indicates a required field
             </Text>
           </Box>
-        </Flex>
-        <HStack spacing={6} mb={8} justify="center">
-          <VStack>
-            <Box w={12} h={12} bg="gold.100" borderRadius="full" display="flex" alignItems="center" justifyContent="center">
-              <CalendarIcon color="gold.600" boxSize={6} />
-            </Box>
-            <Text fontSize="sm" fontWeight="medium">Cultural Events</Text>
-          </VStack>
-          <VStack>
-            <Box w={12} h={12} bg="teal.100" borderRadius="full" display="flex" alignItems="center" justifyContent="center">
-              <Text fontSize="2xl">👥</Text>
-            </Box>
-            <Text fontSize="sm" fontWeight="medium">Youth Connect</Text>
-          </VStack>
-          <VStack>
-            <Box w={12} h={12} bg="orange.100" borderRadius="full" display="flex" alignItems="center" justifyContent="center">
-              <TimeIcon color="orange.600" boxSize={6} />
-            </Box>
-            <Text fontSize="sm" fontWeight="medium">2 Hours Event</Text>
-          </VStack>
-        </HStack>
-  
-        <Card boxShadow="xl" borderRadius="2xl">
-          <CardHeader textAlign="center">
-            <Heading size="lg">Registration Form</Heading>
-            <Text color="gray.600" mt={2}>
-              <Text as="span" color="red.500">*</Text> indicates required
-            </Text>
-          </CardHeader>
-          <CardBody>
-            <VStack spacing={6} align="stretch">
+
+          <Box px={{ base: 6, md: 10 }} pb={10}>
+            <VStack spacing={5} align="stretch">
               <FormControl isInvalid={!!errors.name}>
-                <FormLabel>Name <Text as="span" color="red.500">*</Text></FormLabel>
+                <FormLabel>
+                  Name{" "}
+                  <Text as="span" color="lotus.500">
+                    *
+                  </Text>
+                </FormLabel>
                 <Input
                   placeholder="Your full name"
                   value={formData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
-                  borderWidth={2}
-                  _focus={{ borderColor: "teal.500" }}
                 />
                 <FormErrorMessage>{errors.name}</FormErrorMessage>
               </FormControl>
+
               <FormControl isInvalid={!!errors.dob}>
-                <FormLabel>Date of Birth <Text as="span" color="red.500">*</Text></FormLabel>
+                <FormLabel>
+                  Date of Birth{" "}
+                  <Text as="span" color="lotus.500">
+                    *
+                  </Text>
+                </FormLabel>
                 <Input
                   type="date"
                   value={formData.dob}
                   onChange={(e) => handleInputChange("dob", e.target.value)}
-                  borderWidth={2}
-                  _focus={{ borderColor: "teal.500" }}
                 />
                 <FormErrorMessage>{errors.dob}</FormErrorMessage>
               </FormControl>
+
               <FormControl isInvalid={!!errors.whatsappNumber}>
-                <FormLabel>WhatsApp Number <Text as="span" color="red.500">*</Text></FormLabel>
+                <FormLabel>
+                  WhatsApp Number{" "}
+                  <Text as="span" color="lotus.500">
+                    *
+                  </Text>
+                </FormLabel>
                 <InputGroup>
-                  <InputLeftAddon bg="gray.50">+91</InputLeftAddon>
+                  <InputLeftAddon
+                    bg="night.50"
+                    borderColor="blackAlpha.200"
+                    color="night.700"
+                    fontWeight={600}
+                  >
+                    +91
+                  </InputLeftAddon>
                   <Input
                     type="tel"
                     placeholder="Your WhatsApp number"
                     value={formData.whatsappNumber}
-                    onChange={(e) => handleInputChange("whatsappNumber", e.target.value)}
-                    borderWidth={2}
-                    _focus={{ borderColor: "teal.500" }}
+                    onChange={(e) =>
+                      handleInputChange("whatsappNumber", e.target.value)
+                    }
                   />
                 </InputGroup>
                 <FormErrorMessage>{errors.whatsappNumber}</FormErrorMessage>
               </FormControl>
+
               <FormControl isInvalid={!!errors.email}>
-                <FormLabel>Email <Text as="span" color="red.500">*</Text></FormLabel>
+                <FormLabel>
+                  Email{" "}
+                  <Text as="span" color="lotus.500">
+                    *
+                  </Text>
+                </FormLabel>
                 <Input
                   type="email"
                   placeholder="your.email@example.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  borderWidth={2}
-                  _focus={{ borderColor: "teal.500" }}
                 />
                 <FormErrorMessage>{errors.email}</FormErrorMessage>
               </FormControl>
+
               <FormControl isInvalid={!!errors.gender}>
-                <FormLabel>Gender <Text as="span" color="red.500">*</Text></FormLabel>
-                <RadioGroup value={formData.gender} onChange={(val) => handleInputChange("gender", val)}>
+                <FormLabel>
+                  Gender{" "}
+                  <Text as="span" color="lotus.500">
+                    *
+                  </Text>
+                </FormLabel>
+                <RadioGroup
+                  value={formData.gender}
+                  onChange={(val) => handleInputChange("gender", val)}
+                >
                   <HStack spacing={6}>
-                    <Radio value="Male" colorScheme="teal">Male</Radio>
-                    <Radio value="Female" colorScheme="teal">Female</Radio>
+                    <Radio value="Male" colorScheme="peacock">
+                      Male
+                    </Radio>
+                    <Radio value="Female" colorScheme="peacock">
+                      Female
+                    </Radio>
                   </HStack>
                 </RadioGroup>
                 <FormErrorMessage>{errors.gender}</FormErrorMessage>
               </FormControl>
+
               <FormControl isInvalid={!!errors.collegeOrWorking}>
-                <FormLabel>College / WorkingProfessional <Text as="span" color="red.500">*</Text></FormLabel>
+                <FormLabel>
+                  College / Working Professional{" "}
+                  <Text as="span" color="lotus.500">
+                    *
+                  </Text>
+                </FormLabel>
                 <ChakraSelect
+                  placeholder="--Select--"
                   value={formData.collegeOrWorking}
-                  onChange={(e) => handleInputChange("collegeOrWorking", e.target.value)}
-                  borderWidth={2}
-                  _focus={{ borderColor: "teal.500" }}
+                  onChange={(e) =>
+                    handleInputChange("collegeOrWorking", e.target.value)
+                  }
                 >
-                  <option value="">--Select--</option>
                   <option value="College">College</option>
                   <option value="Working">Working</option>
                 </ChakraSelect>
                 <FormErrorMessage>{errors.collegeOrWorking}</FormErrorMessage>
               </FormControl>
+
               {formData.collegeOrWorking === "Working" && (
                 <FormControl isInvalid={!!errors.companyName}>
-                  <FormLabel>Company Name <Text as="span" color="red.500">*</Text></FormLabel>
+                  <FormLabel>
+                    Company Name{" "}
+                    <Text as="span" color="lotus.500">
+                      *
+                    </Text>
+                  </FormLabel>
                   <Input
                     placeholder="Your company name"
                     value={formData.companyName}
-                    onChange={(e) => handleInputChange("companyName", e.target.value)}
-                    borderWidth={2}
-                    _focus={{ borderColor: "teal.500" }}
+                    onChange={(e) =>
+                      handleInputChange("companyName", e.target.value)
+                    }
                   />
                   <FormErrorMessage>{errors.companyName}</FormErrorMessage>
                 </FormControl>
               )}
+
               {formData.collegeOrWorking === "College" && (
                 <FormControl isInvalid={!!errors.college}>
-                  <FormLabel>College Name <Text as="span" color="red.500">*</Text></FormLabel>
+                  <FormLabel>
+                    College Name{" "}
+                    <Text as="span" color="lotus.500">
+                      *
+                    </Text>
+                  </FormLabel>
                   <Box>
                     <Select
                       options={collegeOptions}
-                      value={collegeOptions.find((opt) => opt.value === formData.college)}
+                      value={collegeOptions.find(
+                        (opt) => opt.value === formData.college
+                      )}
                       onChange={(option) => {
                         handleInputChange("college", option?.value || "");
                       }}
@@ -463,43 +633,49 @@ const Main = () => {
                       styles={customSelectStyles}
                     />
                   </Box>
-              
+
                   {formData.college === "Other College" && (
                     <Input
                       mt={2}
                       placeholder="Enter your college name"
                       value={otherCollege}
                       onChange={(e) => setOtherCollege(e.target.value)}
-                      borderWidth={2}
-                      _focus={{ borderColor: "teal.500" }}
                     />
                   )}
                   <FormErrorMessage>{errors.college}</FormErrorMessage>
                 </FormControl>
               )}
+
               {formData.collegeOrWorking === "College" && (
                 <FormControl isInvalid={!!errors.course}>
-                  <FormLabel>Course <Text as="span" color="red.500">*</Text></FormLabel>
+                  <FormLabel>
+                    Course{" "}
+                    <Text as="span" color="lotus.500">
+                      *
+                    </Text>
+                  </FormLabel>
                   <Input
                     placeholder="e.g., B.Tech, MBA"
                     value={formData.course}
                     onChange={(e) => handleInputChange("course", e.target.value)}
-                    borderWidth={2}
-                    _focus={{ borderColor: "teal.500" }}
                   />
                   <FormErrorMessage>{errors.course}</FormErrorMessage>
                 </FormControl>
               )}
+
               {formData.collegeOrWorking === "College" && (
                 <FormControl isInvalid={!!errors.year}>
-                  <FormLabel>Year <Text as="span" color="red.500">*</Text></FormLabel>
+                  <FormLabel>
+                    Year{" "}
+                    <Text as="span" color="lotus.500">
+                      *
+                    </Text>
+                  </FormLabel>
                   <ChakraSelect
+                    placeholder="--Select Year--"
                     value={formData.year}
                     onChange={(e) => handleInputChange("year", e.target.value)}
-                    borderWidth={2}
-                    _focus={{ borderColor: "teal.500" }}
                   >
-                    <option value="">--Select Year--</option>
                     <option value="1">1st</option>
                     <option value="2">2nd</option>
                     <option value="3">3rd</option>
@@ -508,42 +684,57 @@ const Main = () => {
                   <FormErrorMessage>{errors.year}</FormErrorMessage>
                 </FormControl>
               )}
-             
+
               <FormControl isInvalid={!!errors.slot}>
-                <FormLabel>Slot <Text as="span" color="red.500">*</Text></FormLabel>
+                <FormLabel>
+                  Slot{" "}
+                  <Text as="span" color="lotus.500">
+                    *
+                  </Text>
+                </FormLabel>
                 <Select
                   options={slotOptions}
                   value={slotOptions.find((opt) => opt.value === formData.slot)}
-                  onChange={(option) => handleInputChange("slot", option?.value || "")}
+                  onChange={(option) =>
+                    handleInputChange("slot", option?.value || "")
+                  }
                   placeholder="Select your slot"
                   isClearable
                   styles={customSelectStyles}
                 />
                 <FormErrorMessage>{errors.slot}</FormErrorMessage>
               </FormControl>
+
               <Button
                 onClick={handlePayment}
                 isLoading={isSubmitting}
                 loadingText="Processing"
-                bgGradient="linear(to-r, teal.500, #FFD700)"
-                color="black"
-                fontWeight="semibold"
+                variant="pulse"
                 size="lg"
-                py={6}
+                py={7}
                 w="full"
-                _hover={{ transform: "translateY(-2px)" }}
-                transition="all 0.2s"
-                disabled={isSubmitting}
+                isDisabled={isSubmitting}
                 type="button"
+                mt={2}
               >
-                Register Now for ₹49
+                Register now — ₹49
               </Button>
-              <Text textAlign="center" fontSize="md" mt={4} color="teal.600">
-                For any queries, contact us at <Text as="a" href="mailto:krishnapulse@gmail.com" textDecoration="underline">krishnapulse@gmail.com</Text>
+
+              <Text textAlign="center" fontSize="sm" color="night.500">
+                Questions? Write to{" "}
+                <Text
+                  as="a"
+                  href="mailto:krishnapulse@gmail.com"
+                  color="peacock.600"
+                  fontWeight={600}
+                  textDecoration="underline"
+                >
+                  krishnapulse@gmail.com
+                </Text>
               </Text>
             </VStack>
-          </CardBody>
-        </Card>
+          </Box>
+        </Box>
       </Container>
     </Box>
   );

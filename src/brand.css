@@ -1,0 +1,38 @@
+/* Krishna Pulse — brand motion + signature pulse waveform */
+
+@keyframes kp-pulse-dash {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+@keyframes kp-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes kp-glow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
+}
+
+.kp-pulse-line path {
+  stroke-dasharray: 14 10;
+  animation: kp-pulse-dash 9s linear infinite;
+}
+
+.kp-blob {
+  animation: kp-glow 6s ease-in-out infinite;
+}
+
+.kp-float {
+  animation: kp-float 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kp-pulse-line path,
+  .kp-blob,
+  .kp-float {
+    animation: none !important;
+  }
+}

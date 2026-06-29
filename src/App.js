@@ -7,10 +7,10 @@ import {
   VStack,
   Code,
   Grid,
-  theme,
 } from '@chakra-ui/react';
 
 import Main from './Main';
+import theme from './theme';
 import {Routes,Route} from 'react-router-dom'
 import CollegeManager from './CollegeManager';
 import ThankYou from './ThankYou';
