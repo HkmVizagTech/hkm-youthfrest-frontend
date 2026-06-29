@@ -1,29 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Heading,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Spinner,
-  Input,
-  Flex,
-  FormControl,
-  FormLabel,
-  Tag,
-  Tooltip,
-  Text,
-  HStack,
-  Badge,
-  Select,
-} from "@chakra-ui/react";
-import { CheckCircleIcon, PhoneIcon } from "@chakra-ui/icons";
+import { Box, Heading, Table, Thead, Tbody, Tr, Th, Td, Spinner, Input, Flex, FormControl, FormLabel, Tag, Tooltip, Text, HStack, Badge, Select, Button } from "@chakra-ui/react";
+import { CheckCircleIcon, PhoneIcon, DownloadIcon } from "@chakra-ui/icons";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { useNavigate } from "react-router-dom";
 import Layout from "./component/Layout";
 
 const AdminAttendanceScannedList = () => {
@@ -34,265 +13,110 @@ const AdminAttendanceScannedList = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [timeFilter, setTimeFilter] = useState("");
-  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(
-      "https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users/admin/scanned-list"
-    )
-      .then((res) => res.json())
-      .then((records) => {
-        setData(records);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch scanned attendance", err);
-        setLoading(false);
-      });
+    fetch("https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users/admin/scanned-list")
+      .then(r => r.json()).then(d => { setData(d); setLoading(false); })
+      .catch(() => setLoading(false));
   }, []);
 
-  const filterByDate = (candidate) => {
+  const filterByDate = c => {
     if (!startDate && !endDate) return true;
-    if (!candidate.adminAttendanceDate) return false;
-    const candidateDate = new Date(candidate.adminAttendanceDate);
-    const start = startDate ? new Date(startDate) : null;
-    const end = endDate
-      ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
-      : null;
-    if (start && candidateDate < start) return false;
-    if (end && candidateDate > end) return false;
+    if (!c.adminAttendanceDate) return false;
+    const cd = new Date(c.adminAttendanceDate);
+    if (startDate && cd < new Date(startDate)) return false;
+    if (endDate && cd > new Date(new Date(endDate).setHours(23,59,59,999))) return false;
     return true;
   };
 
-  const filteredData = data.filter((c) => {
+  const filteredData = data.filter(c => {
     const collegeMatch = filteredCollege ? c.college === filteredCollege : true;
-    const dateMatch = filterByDate(c);
-
-    const searchMatch =
-      search.length < 2 ||
-      [c.name, c.email, c.phone, c.college, c.branch]
-        .map((v) => (v && v !== "-" ? v : ""))
-        .join(" ")
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
+    const searchMatch = search.length < 2 || [c.name, c.email, c.phone, c.college, c.branch].map(v => v || "").join(" ").toLowerCase().includes(search.toLowerCase());
     const timeMatch = (() => {
       if (!timeFilter || !c.adminAttendanceDate) return true;
-
-      const dateObj = new Date(c.adminAttendanceDate);
-      const recordDateStr = dateObj.toISOString().split("T")[0];
-      const targetDateStr = startDate || "";
-
-      if (targetDateStr && recordDateStr !== targetDateStr) return true;
-
-      const hours = dateObj.getHours();
-      if (timeFilter === "morning") return hours >= 8 && hours < 16;
-      if (timeFilter === "evening") return hours >= 16;
+      const h = new Date(c.adminAttendanceDate).getHours();
+      if (timeFilter === "morning") return h >= 8 && h < 16;
+      if (timeFilter === "evening") return h >= 16;
       return true;
     })();
-
-    return collegeMatch && dateMatch && searchMatch && timeMatch;
+    return collegeMatch && filterByDate(c) && searchMatch && timeMatch;
   });
 
-  const uniqueColleges = [
-    ...new Set(data.map((c) => c.college).filter(Boolean)),
-  ];
+  const uniqueColleges = [...new Set(data.map(c => c.college).filter(Boolean))];
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(
-      filteredData.map((row, idx) => ({
-        "S.No": idx + 1,
-        Name: row.name,
-        Email: row.email,
-        Phone: row.phone,
-        Gender: row.gender,
-        College: row.college,
-        Branch: row.branch,
-        "Scanned At": row.adminAttendanceDate
-          ? new Date(row.adminAttendanceDate).toLocaleString()
-          : "",
-      }))
-    );
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "AdminScannedAttendance");
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-
-    const file = new Blob([excelBuffer], {
-      type: "application/octet-stream",
-    });
-    saveAs(file, "admin_scanned_attendance.xlsx");
+    const ws = XLSX.utils.json_to_sheet(filteredData.map((r, i) => ({
+      "S.No": i + 1, Name: r.name, Email: r.email, Phone: r.phone, Gender: r.gender,
+      College: r.college, Branch: r.branch,
+      "Scanned At": r.adminAttendanceDate ? new Date(r.adminAttendanceDate).toLocaleString() : "",
+    })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "ScannedAttendance");
+    saveAs(new Blob([XLSX.write(wb, { bookType: "xlsx", type: "array" })], { type: "application/octet-stream" }), "scanned_attendance.xlsx");
   };
 
-  if (loading)
-    return (
-      <Layout>
-        <Flex justify="center" align="center" minH="70vh">
-          <Spinner size="xl" />
-        </Flex>
-      </Layout>
-    );
+  if (loading) return <Layout><Flex justify="center" align="center" minH="70vh"><Spinner size="xl" color="peacock.500" /></Flex></Layout>;
 
   return (
     <Layout>
-      <Box px={{ base: 2, md: 8 }} py={6} maxW="100vw" minH="100vh" bg="gray.50">
-        <Flex justify="space-between" align="center" mb={6} wrap="wrap">
-          <Heading size="lg" color="teal.700">
-            Admin Scanned Attendance List
-          </Heading>
+      <Box py={4}>
+        <Flex justify="space-between" align="center" mb={5} wrap="wrap" gap={3}>
+          <Box>
+            <Text fontSize="xs" fontWeight={700} color="night.400" textTransform="uppercase" letterSpacing="0.12em">Admin</Text>
+            <Heading size="lg" color="night.800" fontWeight={800}>Scanned List</Heading>
+          </Box>
+          <HStack>
+            <Badge px={3} py={1} borderRadius="full" colorScheme="green" fontSize="sm">Scanned: {filteredData.length}</Badge>
+            <Button size="sm" colorScheme="teal" leftIcon={<DownloadIcon />} onClick={exportToExcel}>Export Excel</Button>
+          </HStack>
         </Flex>
 
-        <Box
-          mb={4}
-          overflowX="auto"
-          py={2}
-          px={2}
-          bg="white"
-          borderRadius="md"
-          boxShadow="sm"
-        >
-          <Flex gap={4} align="flex-end" wrap="nowrap" minW="850px">
-            <FormControl w="180px">
-              <FormLabel fontSize="sm">College</FormLabel>
-              <Select
-                placeholder="Select College"
-                onChange={(e) => setFilteredCollege(e.target.value)}
-                value={filteredCollege}
-                bg="gray.50"
-                size="sm"
-              >
-                {uniqueColleges.map((college, i) => (
-                  <option key={i} value={college}>
-                    {college}
-                  </option>
-                ))}
+        <Box mb={4} p={4} bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)" overflowX="auto">
+          <Flex gap={3} align="flex-end" wrap="nowrap" minW="700px">
+            <FormControl w="160px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">College</FormLabel>
+              <Select placeholder="All colleges" size="sm" value={filteredCollege} onChange={e => setFilteredCollege(e.target.value)}>
+                {uniqueColleges.map((c, i) => <option key={i} value={c}>{c}</option>)}
               </Select>
             </FormControl>
-
-            <FormControl w="150px">
-              <FormLabel fontSize="sm">From</FormLabel>
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                bg="gray.50"
-                size="sm"
-              />
+            <FormControl w="130px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">From</FormLabel>
+              <Input type="date" size="sm" value={startDate} onChange={e => setStartDate(e.target.value)} />
             </FormControl>
-
-            <FormControl w="150px">
-              <FormLabel fontSize="sm">To</FormLabel>
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                bg="gray.50"
-                size="sm"
-              />
+            <FormControl w="130px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">To</FormLabel>
+              <Input type="date" size="sm" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </FormControl>
-
-            <FormControl w="220px">
-              <FormLabel fontSize="sm">Search</FormLabel>
-              <Input
-                placeholder="Name, email, phone, college..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                bg="gray.50"
-                size="sm"
-              />
-            </FormControl>
-
-            <FormControl w="150px">
-              <FormLabel fontSize="sm">Time of Day</FormLabel>
-              <Select
-                placeholder="All"
-                value={timeFilter}
-                onChange={(e) => setTimeFilter(e.target.value)}
-                bg="gray.50"
-                size="sm"
-              >
-                <option value="morning">Morning</option>
-                <option value="evening">Evening</option>
+            <FormControl w="130px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">Time</FormLabel>
+              <Select placeholder="All" size="sm" value={timeFilter} onChange={e => setTimeFilter(e.target.value)}>
+                <option value="morning">Morning</option><option value="evening">Evening</option>
               </Select>
+            </FormControl>
+            <FormControl flex={1}><FormLabel fontSize="xs" fontWeight={700} color="night.600">Search</FormLabel>
+              <Input placeholder="Name, phone, college…" size="sm" value={search} onChange={e => setSearch(e.target.value)} />
             </FormControl>
           </Flex>
         </Box>
 
-        <HStack mb={4}>
-          <Badge colorScheme="purple" fontSize="lg">
-            Total Scanned: {filteredData.length}
-          </Badge>
-        </HStack>
-
-        <Box overflowX="auto" rounded="md" boxShadow="md" bg="white" p={2}>
+        <Box overflowX="auto" bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)">
           <Table variant="simple" size="sm">
-            <Thead bg="gray.100">
-              <Tr>
-                <Th>#</Th>
-                <Th>Name</Th>
-                <Th>Email</Th>
-                <Th>Gender</Th>
-                <Th>Phone</Th>
-                <Th>College</Th>
-                <Th>Branch</Th>
-                <Th>Scanned At</Th>
-                <Th>Status</Th>
-              </Tr>
-            </Thead>
+            <Thead><Tr bg="night.50">
+              {["#","Name","Email","Gender","Phone","College","Branch","Scanned at","Status"].map(h => (
+                <Th key={h} fontSize="xs" color="night.500" fontWeight={700} whiteSpace="nowrap">{h}</Th>
+              ))}
+            </Tr></Thead>
             <Tbody>
-              {filteredData.map((candidate, idx) => (
-                <Tr key={candidate._id} _hover={{ bg: "gray.50" }}>
-                  <Td>{idx + 1}</Td>
-                  <Td>
-                    <Text fontWeight="semibold">{candidate.name}</Text>
-                  </Td>
-                  <Td>
-                    <Tooltip label={candidate.email} fontSize="xs">
-                      <Text fontSize="sm" noOfLines={1} maxW="140px">
-                        {candidate.email}
-                      </Text>
-                    </Tooltip>
-                  </Td>
-                  <Td>{candidate.gender || ""}</Td>
-                  <Td>
-                    <Tooltip label={candidate.phone} fontSize="xs">
-                      <HStack spacing={1}>
-                        <PhoneIcon boxSize={3} color="green.500" />
-                        <Text fontSize="sm" noOfLines={1} maxW="110px">
-                          {candidate.phone}
-                        </Text>
-                      </HStack>
-                    </Tooltip>
-                  </Td>
-                  <Td>
-                    <Text fontSize="sm">{candidate.college || ""}</Text>
-                  </Td>
-                  <Td>{candidate.branch || ""}</Td>
-                  <Td>
-                    {candidate.adminAttendanceDate
-                      ? new Date(
-                          candidate.adminAttendanceDate
-                        ).toLocaleDateString()
-                      : ""}
-                  </Td>
-                  <Td>
-                    <Tag colorScheme="green" size="sm">
-                      <CheckCircleIcon mr={1} color="green.500" /> Scanned
-                    </Tag>
-                  </Td>
+              {filteredData.map((c, i) => (
+                <Tr key={c._id} _hover={{ bg: "peacock.50" }} transition="background 0.1s">
+                  <Td fontSize="xs" color="night.400">{i + 1}</Td>
+                  <Td><Text fontWeight={600} fontSize="sm" color="night.800">{c.name}</Text></Td>
+                  <Td><Tooltip label={c.email}><Text fontSize="xs" noOfLines={1} maxW="140px" color="night.500">{c.email}</Text></Tooltip></Td>
+                  <Td fontSize="sm">{c.gender || "—"}</Td>
+                  <Td><HStack spacing={1}><PhoneIcon boxSize={3} color="peacock.500" /><Text fontSize="sm">{c.phone}</Text></HStack></Td>
+                  <Td fontSize="sm">{c.college || "—"}</Td>
+                  <Td fontSize="sm">{c.branch || "—"}</Td>
+                  <Td fontSize="xs" color="night.400" whiteSpace="nowrap">{c.adminAttendanceDate ? new Date(c.adminAttendanceDate).toLocaleString() : "—"}</Td>
+                  <Td><Tag colorScheme="green" size="sm"><CheckCircleIcon mr={1} />Scanned</Tag></Td>
                 </Tr>
               ))}
-              {filteredData.length === 0 && (
-                <Tr>
-                  <Td colSpan={9}>
-                    <Text color="gray.400" textAlign="center" py={10}>
-                      No scanned attendance records found.
-                    </Text>
-                  </Td>
-                </Tr>
-              )}
+              {filteredData.length === 0 && <Tr><Td colSpan={9}><Text color="night.300" textAlign="center" py={10} fontSize="sm">No scanned records found.</Text></Td></Tr>}
             </Tbody>
           </Table>
         </Box>

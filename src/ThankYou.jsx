@@ -1,287 +1,143 @@
-  import React, { useEffect, useState } from 'react';
-  import {
-    Box,
-    Button,
-    Center,
-    Flex,
-    Heading,
-    Icon,
-    Image,
-    Link,
-    Stack,
-    Text,
-    VStack,
-    Spinner,
-    HStack,
-    SimpleGrid,
-  } from '@chakra-ui/react';
-  import {
-    CheckCircle,
-    Calendar,
-    MapPin,
-    Phone,
-    Mail,
-    ArrowLeft,
-    Download,
-    Share2,
-  } from 'lucide-react';
-  import { useParams, useNavigate } from 'react-router-dom';
-  import axios from 'axios';
-  import krishnaPulseLogo from './component/image.png';
+import React, { useEffect, useState } from 'react';
+import { Box, Button, Center, Flex, Heading, Icon, Image, Text, VStack, HStack, Spinner, Link, SimpleGrid } from '@chakra-ui/react';
+import { CheckCircle, Calendar, MapPin, Phone, Mail, ArrowLeft } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import krishnaPulseLogo from './component/image.png';
 
-  export default function ThankYouPage() {
-    const { id } = useParams();
-    const navigate = useNavigate();
+const API_BASE = 'https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users';
 
-    const [status, setStatus] = useState('loading'); 
-    const [candidate, setCandidate] = useState(null);
+export default function ThankYouPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [status, setStatus] = useState('loading');
+  const [candidate, setCandidate] = useState(null);
 
-    useEffect(() => {
-      const verifyPayment = async () => {
-        try {
+  useEffect(() => {
+    const verifyPayment = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/verify-payment/${id}`);
+        if (res.data.success) { setCandidate(res.data.candidate); setStatus('success'); }
+        else setStatus('invalid');
+      } catch { setStatus('error'); }
+    };
+    if (id) verifyPayment();
+  }, [id]);
 
-          const res = await axios.get(`https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users/verify-payment/${id}`);
-
-          if (res.data.success) {
-            setCandidate(res.data.candidate);
-            setStatus('success');
-          } else {
-            setStatus('invalid');
-          }
-        } catch (err) {
-          setStatus('error');
-        }
-      };
-
-      if (id) verifyPayment();
-    }, [id]);
-
-    if (status === 'loading') {
-      return (
-        <Center minH="100vh" bg="gray.50">
-          <Spinner size="xl" color="teal.500" />
-        </Center>
-      );
-    }
-
-    if (status === 'invalid' || status === 'error') {
-      return (
-        <Box textAlign="center" mt={20} p={6}>
-          <VStack spacing={4}>
-            <Heading size="lg" color={status === 'invalid' ? 'red.500' : 'orange.500'}>
-              {status === 'invalid' ? 'Invalid Payment' : 'Server Error'}
-            </Heading>
-            <Text>
-              {status === 'invalid'
-                ? "This payment ID is not valid or doesn't match any registration."
-                : 'Something went wrong while verifying your payment. Please try again later.'}
-            </Text>
-            <Button colorScheme="teal" onClick={() => navigate('/')}>
-              Go Back to Home
-            </Button>
-          </VStack>
-        </Box>
-      );
-    }
-
-    return (
-      <Box minH="100vh" bgGradient="linear(to-br, orange.100, yellow.100)" py={8} px={4}>
-        <Box maxW="2xl" mx="auto">
-<Flex
-  align="center"
-  justify="center"
-  gap={4}
-  mb={8}
-  direction="row"     
-  textAlign="left"     
-  flexWrap="wrap"    
->
-
-  <Box position="relative" minW="96px">
-    <Image
-      src={krishnaPulseLogo}
-      alt="Krishna Pulse Youth Fest Logo"
-      boxSize="96px"
-      rounded="full"
-      shadow="lg"
-    />
-    <Center
-      position="absolute"
-      top="-2"
-      right="-2"
-      bg="green.500"
-      rounded="full"
-      p={1}
-    >
-      <Icon as={CheckCircle} w={6} h={6} color="white" />
+  if (status === 'loading') return (
+    <Center minH="100vh" bg="night.900">
+      <VStack spacing={4}>
+        <Spinner size="xl" color="peacock.400" thickness="3px" />
+        <Text color="whiteAlpha.600" fontSize="sm">Verifying your registration…</Text>
+      </VStack>
     </Center>
-  </Box>
+  );
 
-  {/* Right: Title and subtitle */}
-  <Box ml={2}>
-    <Heading size="lg" color="black" fontWeight="bold" lineHeight="short">
-      KRISHNA PULSE <br /> YOUTH FESTIVAL
-    </Heading>
-    <Text fontSize="md" fontWeight="semibold" mt={2} color="gray.700">
-      A Fest of Fun, Faith & Freedom
-    </Text>
-  </Box>
-</Flex>
+  if (status === 'invalid' || status === 'error') return (
+    <Box bg="night.900" minH="100vh" display="flex" alignItems="center" justifyContent="center" px={4}>
+      <Box bg="cream" borderRadius="2xl" overflow="hidden" maxW="md" w="full" boxShadow="0 30px 60px -20px rgba(12,9,33,0.8)" textAlign="center">
+        <Box h="5px" bg={status === 'invalid' ? 'lotus.500' : 'saffron.500'} />
+        <VStack spacing={4} px={8} py={10}>
+          <Text fontSize="3xl">{status === 'invalid' ? '⚠️' : '🔌'}</Text>
+          <Heading size="md" color="night.800">{status === 'invalid' ? 'Invalid payment' : 'Something went wrong'}</Heading>
+          <Text fontSize="sm" color="night.500">{status === 'invalid' ? "This payment ID doesn't match any registration." : 'We couldn\'t verify your payment. Please try again later.'}</Text>
+          <Button variant="pulse" onClick={() => navigate('/')} mt={2}>Back to home</Button>
+        </VStack>
+      </Box>
+    </Box>
+  );
 
+  const details = [
+    { icon: Calendar, label: 'Event date', value: 'August 15, 2025' },
+    { icon: MapPin, label: 'Venue', value: 'Gadiraju Palace, Beach Road, Visakhapatnam' },
+    { icon: Phone, label: 'WhatsApp updates', value: "You'll receive event updates on WhatsApp" },
+  ];
 
+  return (
+    <Box bg="night.900" minH="100vh" position="relative" overflow="hidden">
+      <Box className="kp-blob" position="absolute" top="-80px" left="-60px" w="320px" h="320px" bgGradient="radial(peacock.400, transparent 70%)" filter="blur(20px)" opacity={0.35} pointerEvents="none" />
+      <Box className="kp-blob" position="absolute" bottom="0" right="-50px" w="280px" h="280px" bgGradient="radial(lotus.400, transparent 70%)" filter="blur(20px)" opacity={0.3} pointerEvents="none" />
 
+      {/* hero */}
+      <Box pt={{ base: 10, md: 14 }} pb={{ base: 24, md: 28 }} px={4} textAlign="center" position="relative">
+        <Text fontSize="xs" letterSpacing="0.32em" fontWeight={700} color="peacock.300" textTransform="uppercase" mb={6}>
+          Hare Krishna Movement · Visakhapatnam
+        </Text>
+        <Box className="kp-float" mx="auto" mb={5} position="relative" display="inline-block">
+          <Box boxSize={{ base: "96px", md: "112px" }} borderRadius="full" overflow="hidden" border="3px solid" borderColor="marigold.400" boxShadow="0 0 40px -8px rgba(255,176,32,0.6)">
+            <Image src={krishnaPulseLogo} alt="Krishna Pulse" objectFit="cover" w="100%" h="100%" />
+          </Box>
+          <Box position="absolute" bottom={0} right={0} bg="peacock.500" borderRadius="full" p="6px" border="2px solid" borderColor="night.900">
+            <CheckCircle size={16} color="white" />
+          </Box>
+        </Box>
+        <Heading fontWeight={800} lineHeight={0.95} letterSpacing="-0.02em" color="white" fontSize={{ base: "4xl", md: "5xl" }}>
+          Krishna <Box as="span" bgGradient="linear(to-r, marigold.400, saffron.500, lotus.400)" bgClip="text">Pulse</Box>
+        </Heading>
+        <Text fontWeight={700} letterSpacing="0.18em" textTransform="uppercase" color="whiteAlpha.600" fontSize="xs" mt={1}>
+          Youth Festival
+        </Text>
+      </Box>
 
-          <Box
-            bgGradient="linear(to-r, purple.500, pink.500)"
-            color="white"
-            p={6}
-            rounded="lg"
-            shadow="xl"
-            textAlign="center"
-            mb={6}
-          >
-            <Heading fontSize="2xl" mb={2}>🎉 Registration Successful!</Heading>
-            <Text fontSize="lg" opacity={0.9}>
-              Welcome to Krishna Pulse Youth Fest 2025
-            </Text>
+      {/* pass card */}
+      <Center px={4} pb={16} mt={{ base: -16, md: -20 }}>
+        <Box maxW="xl" w="full">
+          {/* success banner */}
+          <Box bg="peacock.600" borderRadius="2xl" px={6} py={5} mb={4} textAlign="center" boxShadow="0 16px 40px -16px rgba(15,182,166,0.5)">
+            <HStack justify="center" spacing={2} mb={1}>
+              <CheckCircle size={20} color="white" />
+              <Text fontWeight={800} color="white" fontSize="lg">Registration confirmed!</Text>
+            </HStack>
+            <Text color="whiteAlpha.800" fontSize="sm">Welcome to Krishna Pulse Youth Fest 2025</Text>
           </Box>
 
-          {candidate && (
-            <Box bg="white" p={4} rounded="lg" shadow="md" mb={6}>
-              <Text fontWeight="bold" color="purple.600" mb={1}>
-                Thank you, {candidate.name}!
-              </Text>
-              <Text fontSize="sm" color="gray.600">
-                We've received your payment of ₹{candidate.paymentAmount}
-              </Text>
-              <Text fontSize="sm" color="gray.500">Payment ID: {candidate.paymentId}</Text>
-            </Box>
-          )}
+          <Box bg="cream" borderRadius="2xl" overflow="hidden" boxShadow="0 30px 60px -25px rgba(12,9,33,0.7)">
+            <Box h="5px" bgGradient="linear(to-r, peacock.500, marigold.400, lotus.400)" />
 
-          <Box bg="white" p={6} rounded="lg" shadow="lg" mb={6}>
-            <Stack spacing={6}>
-              <Box textAlign="center">
-                <Heading size="md" color="purple.600" mb={2}>
-                  Your Registration is Confirmed!
-                </Heading>
-              </Box>
-
-              <VStack spacing={4} align="stretch">
-                <Flex align="center" gap={3} p={3} bg="purple.50" rounded="lg">
-                  <Icon as={Calendar} w={5} h={5} color="purple.600" />
-                  <Box>
-                    <Text fontWeight="semibold">Event Date</Text>
-                    {/* <Text fontSize="sm" color="gray.600">August 19, 2024 (Janmashtami)</Text>
-                    */}<Text fontSize="sm" color="gray.600">August 15, 2025</Text>
-                  </Box>
-                </Flex>
-
-                <Flex align="center" gap={3} p={3} bg="purple.50" rounded="lg">
-                  <Icon as={MapPin} w={5} h={5} color="purple.600" />
-                  <Box>
-                    <Text fontWeight="semibold">Venue</Text>
-                    {/* <Text fontSize="sm" color="gray.600">Main Auditorium, Campus Grounds</Text> */}
-                    <Text fontSize="sm" color="gray.600">Gadiraju Palace, Beach Road, Visakhapatnam</Text>
-                  </Box>
-                </Flex>
-
-                <Flex align="center" gap={3} p={3} bg="purple.50" rounded="lg">
-                  <Icon as={Phone} w={5} h={5} color="purple.600" />
-                  <Box>
-                    <Text fontWeight="semibold">WhatsApp Updates</Text>
-                    <Text fontSize="sm" color="gray.600">
-                      You'll receive event updates and group links on WhatsApp
-                    </Text>
-                  </Box>
-                </Flex>
-              </VStack>
-
-              {/* <Box
-                bgGradient="linear(to-r, yellow.50, orange.50)"
-                p={4}
-                rounded="lg"
-                border="2px solid"
-                borderColor="yellow.400"
-              >
-                <Text fontWeight="semibold" color="purple.600" mb={2}>
-                  Next Steps:
-                </Text>
-                <VStack spacing={1} align="start" fontSize="sm" color="gray.600">
-                  <Text>• Save your payment receipt</Text>
-                  <Text>• Join our WhatsApp group (link sent separately)</Text>
-                  <Text>• Be on time at the venue</Text>
-                </VStack>
-              </Box> */}
-
-              {/* <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
-              <Button
-    variant="outline"
-    leftIcon={<Download />}
-    onClick={() => window.open(`https://vrc-server-110406681774.asia-south1.run.app/api/download-receipt/${candidate.paymentId}`, '_blank')}
-  >
-    Download Receipt
-  </Button>
-                <Button
-    variant="outline"
-    leftIcon={<Share2 />}
-    onClick={() => window.open('https://youthfest.harekrishnavizag.org/', '_blank')}
-  >
-    Share Registration Link
-  </Button>
-              </SimpleGrid> */}
-
-              <Box textAlign="center" p={4} bg="gray.100" rounded="lg">
-                <Text fontSize="sm" fontWeight="semibold" mb={2}>Need Help?</Text>
-                <HStack justify="center" spacing={4} fontSize="sm">
-                  <Link
-                    href="mailto:krishnapulse@gmail.com"
-                    color="purple.600"
-                    display="flex"
-                    alignItems="center"
-                    gap={1}
-                  >
-                    <Icon as={Mail} w={4} h={4} />
-                    Email Support
-                  </Link>
-                  <Link
-                    href="tel:+919876543210"
-                    color="purple.600"
-                    display="flex"
-                    alignItems="center"
-                    gap={1}
-                  >
-                    <Icon as={Phone} w={4} h={4} />
-                    Call Us
-                  </Link>
+            {candidate && (
+              <Box px={{ base: 6, md: 10 }} pt={8} pb={5} borderBottom="1px solid" borderColor="blackAlpha.100">
+                <Text fontSize="xl" fontWeight={800} color="night.800">Hare Krishna, {candidate.name}! 🙏</Text>
+                <HStack mt={1} spacing={4} fontSize="sm" color="night.500" flexWrap="wrap">
+                  <Text>Payment ₹{candidate.paymentAmount}</Text>
+                  <Text>·</Text>
+                  <Text fontFamily="mono" fontSize="xs">ID: {candidate.paymentId}</Text>
                 </HStack>
               </Box>
-            </Stack>
+            )}
+
+            <VStack spacing={3} px={{ base: 6, md: 10 }} py={6} align="stretch">
+              {details.map(({ icon: Ic, label, value }) => (
+                <Flex key={label} align="flex-start" gap={3} p={4} bg="night.50" borderRadius="xl">
+                  <Box mt="2px" color="peacock.600" flexShrink={0}><Ic size={18} /></Box>
+                  <Box>
+                    <Text fontSize="xs" fontWeight={700} color="night.500" textTransform="uppercase" letterSpacing="0.08em">{label}</Text>
+                    <Text fontSize="sm" fontWeight={600} color="night.800" mt={0.5}>{value}</Text>
+                  </Box>
+                </Flex>
+              ))}
+            </VStack>
+
+            <Box px={{ base: 6, md: 10 }} pb={6}>
+              <Box bg="night.800" borderRadius="xl" px={5} py={4} textAlign="center">
+                <Text fontWeight={700} color="marigold.300" mb={1}>🙏 Radhe Krishna! 🙏</Text>
+                <Text fontSize="sm" color="whiteAlpha.700">We're excited to celebrate with you!</Text>
+              </Box>
+
+              <HStack justify="center" spacing={5} mt={5} fontSize="sm">
+                <Link href="mailto:krishnapulse@gmail.com" color="peacock.600" fontWeight={600} display="flex" alignItems="center" gap={1}>
+                  <Mail size={14} /> Email support
+                </Link>
+              </HStack>
+            </Box>
           </Box>
 
-          <Center>
-            <Button
-              onClick={() => navigate('/')}
-              variant="ghost"
-              leftIcon={<ArrowLeft />}
-            >
-              Register Another Participant
+          <Center mt={6}>
+            <Button variant="peacockGhost" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate('/')} size="sm">
+              Register another participant
             </Button>
           </Center>
-
-          <Box
-            textAlign="center"
-            mt={8}
-            p={4}
-            bgGradient="linear(to-r, purple.500, pink.500)"
-            color="white"
-            rounded="lg"
-          >
-            <Text fontWeight="semibold" mb={1}>🙏 Radhe Krishna! 🙏</Text>
-            <Text fontSize="sm" opacity={0.9}>
-              We're excited to celebrate Janmashtami with you!
-            </Text>
-          </Box>
         </Box>
-      </Box>
-    );
-  }
+      </Center>
+    </Box>
+  );
+}

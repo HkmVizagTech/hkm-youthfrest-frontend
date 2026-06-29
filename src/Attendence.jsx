@@ -1,24 +1,7 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Heading,
-  FormControl,
-  FormLabel,
-  Input,
-  Button,
-  FormErrorMessage,
-  useToast,
-  InputGroup,
-  InputLeftAddon,
-  Flex,
-  Text,
-  Icon,
-  Fade,
-  Image,
-  Link, 
-} from "@chakra-ui/react";
-import { CheckCircleIcon, WarningIcon } from "@chakra-ui/icons"; 
+import { Box, Button, FormControl, FormLabel, Input, InputGroup, InputLeftAddon, FormErrorMessage, Text, Flex, Link } from "@chakra-ui/react";
 import { QRCodeSVG } from "qrcode.react";
+import { CheckCircle, AlertTriangle } from "lucide-react";
 
 const Attendence = () => {
   const [phone, setPhone] = useState("");
@@ -26,225 +9,92 @@ const Attendence = () => {
   const [loading, setLoading] = useState(false);
   const [successName, setSuccessName] = useState("");
   const [attendanceToken, setAttendanceToken] = useState("");
-  const [attendanceDate, setAttendanceDate] = useState(""); 
-  const [notFound, setNotFound] = useState(false); 
-  const toast = useToast();
+  const [attendanceDate, setAttendanceDate] = useState("");
+  const [notFound, setNotFound] = useState(false);
 
   const handleSubmit = async () => {
-    setError("");
-    setSuccessName("");
-    setAttendanceToken("");
-    setAttendanceDate(""); 
-    setNotFound(false); 
-    const trimmedPhone = phone.trim().replace(/\D/g, "");
-
-    if (!/^\d{10}$/.test(trimmedPhone)) {
-      setError("Please enter a valid 10-digit phone number.");
-      return;
-    }
-
+    setError(""); setSuccessName(""); setAttendanceToken(""); setAttendanceDate(""); setNotFound(false);
+    const trimmed = phone.trim().replace(/\D/g, "");
+    if (!/^\d{10}$/.test(trimmed)) { setError("Enter a valid 10-digit number."); return; }
     setLoading(true);
     try {
       const res = await fetch("https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users/mark-attendance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ whatsappNumber: trimmedPhone }),
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ whatsappNumber: trimmed }),
       });
-
       const data = await res.json();
-
       if (res.ok) {
         if ((data.status === "already-marked" || data.status === "success") && data.attendanceToken) {
-          setAttendanceToken(data.attendanceToken);
-          setSuccessName(data.name || "");
-          setAttendanceDate(data.attendanceDate || ""); 
+          setAttendanceToken(data.attendanceToken); setSuccessName(data.name || ""); setAttendanceDate(data.attendanceDate || "");
         }
-
-        if (data.status === "already-marked") {
-          toast({
-            title: "Already Marked",
-            description: data.message || "Attendance has already been marked.",
-            status: "info",
-            duration: 3500,
-            isClosable: true,
-          });
-        } else if (data.status === "success") {
-          toast({
-            title: "Attendance Marked!",
-            description: `Marked for ${data.name}`,
-            status: "success",
-            duration: 3500,
-            isClosable: true,
-          });
-          setSuccessName(data.name);
-          setPhone("");
-        }
+        if (data.status === "success") setPhone("");
       } else {
-        if (
-          data?.message?.toLowerCase().includes("not found") ||
-          data?.message?.toLowerCase().includes("no user")
-        ) {
-          setNotFound(true);
-        } else {
-          toast({
-            title: "Error",
-            description: data.message || "Could not mark attendance",
-            status: "error",
-            duration: 3500,
-            isClosable: true,
-          });
-        }
+        if (data?.message?.toLowerCase().includes("not found") || data?.message?.toLowerCase().includes("no user")) setNotFound(true);
+        else setError(data.message || "Could not mark attendance");
       }
-    } catch (err) {
-      toast({
-        title: "Server error",
-        description: err.message || "Something went wrong",
-        status: "error",
-        duration: 3500,
-        isClosable: true,
-      });
-    }
+    } catch (e) { setError(e.message || "Something went wrong"); }
     setLoading(false);
   };
 
-  const formatDate = (isoString) => {
-    if (!isoString) return "";
-    const d = new Date(isoString);
-    return d.toLocaleString(); 
-  };
-
   return (
-    <Flex minH="100vh" align="center" justify="center" bg="gray.50" px={2}>
-      <Box
-        w="full"
-        maxW="400px"
-        bg="white"
-        p={8}
-        borderRadius="2xl"
-        boxShadow="xl"
-        textAlign="center"
-      >
-        <Heading mb={2} size="lg" color="teal.600" fontWeight="bold">
-          Mark Attendance
-        </Heading>
-        <Text mb={7} fontSize="md" color="gray.500">
-          Enter your WhatsApp mobile number to mark your attendance.
+    <Box bg="night.900" minH="100vh" display="flex" alignItems="center" justifyContent="center" px={4} position="relative" overflow="hidden">
+      <Box className="kp-blob" position="absolute" top="-60px" left="-40px" w="260px" h="260px" bgGradient="radial(peacock.400, transparent 70%)" filter="blur(20px)" opacity={0.35} pointerEvents="none" />
+      <Box className="kp-blob" position="absolute" bottom="-40px" right="-40px" w="240px" h="240px" bgGradient="radial(lotus.400, transparent 70%)" filter="blur(20px)" opacity={0.3} pointerEvents="none" />
+
+      <Box w="full" maxW="400px" position="relative">
+        <Text fontSize="xs" letterSpacing="0.32em" fontWeight={700} color="peacock.300" textTransform="uppercase" textAlign="center" mb={6}>
+          Krishna Pulse · Attendance
         </Text>
 
-        <form
-          onSubmit={e => {
-            e.preventDefault();
-            handleSubmit();
-          }}
-        >
-          <FormControl isInvalid={!!error}>
-            <FormLabel htmlFor="phone" fontWeight="medium">
-              WhatsApp Number
-            </FormLabel>
-            <InputGroup>
-              <InputLeftAddon children="+91" />
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="10-digit mobile"
-                value={phone}
-                onChange={e => {
-                  const val = e.target.value.replace(/\D/g, "");
-                  if (val.length <= 10) setPhone(val);
-                }}
-                maxLength={10}
-                autoComplete="tel"
-                bg="gray.100"
-                fontWeight="medium"
-                letterSpacing="wide"
-                required
-                isDisabled={loading}
-              />
-            </InputGroup>
-            <FormErrorMessage>{error}</FormErrorMessage>
-          </FormControl>
+        <Box bg="cream" borderRadius="2xl" overflow="hidden" boxShadow="0 30px 60px -20px rgba(12,9,33,0.8)">
+          <Box h="5px" bgGradient="linear(to-r, peacock.500, marigold.400, lotus.400)" />
+          <Box px={8} py={8}>
+            <Text fontSize="xl" fontWeight={800} color="night.800" mb={2} textAlign="center">Mark attendance</Text>
+            <Text fontSize="sm" color="night.500" textAlign="center" mb={6}>Enter your WhatsApp number to check in.</Text>
 
-          <Button
-            mt={6}
-            colorScheme="teal"
-            width="full"
-            type="submit"
-            isLoading={loading}
-            loadingText="Marking..."
-            disabled={loading || phone.length !== 10}
-            fontWeight="bold"
-            fontSize="lg"
-            borderRadius="lg"
-            boxShadow="md"
-          >
-            Mark Attendance
-          </Button>
-        </form>
+            {!attendanceToken && (
+              <form onSubmit={e => { e.preventDefault(); handleSubmit(); }}>
+                <FormControl isInvalid={!!error} mb={4}>
+                  <FormLabel>WhatsApp Number</FormLabel>
+                  <InputGroup>
+                    <InputLeftAddon bg="night.50" fontWeight={600} color="night.700">+91</InputLeftAddon>
+                    <Input type="tel" placeholder="10-digit number" value={phone}
+                      onChange={e => { const v = e.target.value.replace(/\D/g,""); if (v.length <= 10) setPhone(v); }}
+                      maxLength={10} isDisabled={loading} />
+                  </InputGroup>
+                  <FormErrorMessage>{error}</FormErrorMessage>
+                </FormControl>
+                <Button variant="pulse" type="submit" isLoading={loading} loadingText="Marking…" w="full" py={6} isDisabled={phone.length !== 10}>
+                  Mark attendance
+                </Button>
+              </form>
+            )}
 
-        <Fade in={notFound}>
-          {notFound && (
-            <Box mt={6} p={4} borderRadius="lg" bg="orange.50" border="1px solid" borderColor="orange.200" textAlign="left">
-              <Flex align="center" mb={2}>
-                <Icon as={WarningIcon} color="orange.400" mr={2} boxSize={6} />
-                <Text fontWeight="bold" color="orange.600">
-                  Number not registered!
-                </Text>
-              </Flex>
-              <Text color="orange.700" fontSize="md" mb={2}>
-                Please register here:{" "}
-                <Link color="teal.600" href="https://youthfest.harekrishnavizag.org/" isExternal fontWeight="bold" textDecoration="underline">
-                  https://youthfest.harekrishnavizag.org/
-                </Link>
-              </Text>
-              <Text color="orange.700" fontSize="md">
-                And please visit the enquiry counter.
-              </Text>
-            </Box>
-          )}
-        </Fade>
-
-        <Fade in={!!attendanceToken}>
-          {attendanceToken && (
-            <Box mt={8} textAlign="center">
-              <Icon as={CheckCircleIcon} w={12} h={12} color="green.400" />
-              {successName && (
-                <>
-                  <Text mt={3} fontSize="xl" fontWeight="bold" color="green.600">
-                    Attendance marked for
-                  </Text>
-                  <Text fontSize="2xl" fontWeight="extrabold" color="teal.700">
-                    {successName}
-                  </Text>
-                </>
-              )}
-              {attendanceDate && (
-                <Text fontSize="md" color="gray.700" mt={2}>
-                  Attendance marked on: <b>{formatDate(attendanceDate)}</b>
-                </Text>
-              )}
-              <Text fontSize="lg" color="teal.700" mb={2} mt={2}>
-                Show this QR at Reporting Counter and Collect Entry Band
-              </Text>
-              <Box display="flex" justifyContent="center" alignItems="center">
-                <QRCodeSVG value={attendanceToken} size={200} />
+            {notFound && (
+              <Box mt={4} p={4} bg="saffron.50" border="1.5px solid" borderColor="saffron.300" borderRadius="xl">
+                <Flex align="center" gap={2} mb={2}><AlertTriangle size={18} color="#CC7C00" /><Text fontWeight={700} color="saffron.700" fontSize="sm">Number not registered</Text></Flex>
+                <Text fontSize="sm" color="saffron.700">Register at <Link href="https://youthfest.harekrishnavizag.org/" isExternal color="peacock.600" fontWeight={600} textDecoration="underline">youthfest.harekrishnavizag.org</Link> and visit the enquiry counter.</Text>
               </Box>
-              <Image
-                mt={2}
-                mx="auto"
-                src="https://cdn.dribbble.com/users/1615584/screenshots/4187826/check02.gif"
-                alt="Success"
-                boxSize="80px"
-                borderRadius="full"
-                objectFit="cover"
-              />
-              <Text mt={4} fontSize="md" fontWeight="bold" color="teal.600">
-                Please visit the admin counter.
-              </Text>
-            </Box>
-          )}
-        </Fade>
+            )}
+
+            {attendanceToken && (
+              <Box textAlign="center">
+                <Flex justify="center" mb={3}><CheckCircle size={48} color="#0A7268" /></Flex>
+                <Text fontSize="lg" fontWeight={800} color="night.800">{successName}</Text>
+                {attendanceDate && <Text fontSize="xs" color="night.500" mt={1}>{new Date(attendanceDate).toLocaleString()}</Text>}
+                <Text fontSize="sm" color="peacock.700" fontWeight={600} mt={4} mb={4}>Show this QR at the reporting counter to collect your entry band.</Text>
+                <Flex justify="center">
+                  <Box p={3} bg="white" borderRadius="xl" border="2px solid" borderColor="peacock.300">
+                    <QRCodeSVG value={attendanceToken} size={180} />
+                  </Box>
+                </Flex>
+                <Text fontSize="sm" color="night.500" mt={4}>🙏 Hare Krishna! Please visit the admin counter.</Text>
+              </Box>
+            )}
+          </Box>
+        </Box>
       </Box>
-    </Flex>
+    </Box>
   );
 };
 

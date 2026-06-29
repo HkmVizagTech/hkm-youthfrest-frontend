@@ -1,208 +1,94 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  BrowserMultiFormatReader,
-  NotFoundException,
-} from "@zxing/library";
+import { BrowserMultiFormatReader, NotFoundException } from "@zxing/library";
 import axios from "axios";
-import { useToast } from "@chakra-ui/react"; 
-
-const SuccessIcon = () => (
-  <span style={{
-    color: "#21cc51",
-    fontSize: "1.5em",
-    verticalAlign: "middle",
-    marginRight: 6
-  }}>✔️</span>
-);
-const WarningIcon = () => (
-  <span style={{
-    color: "#ff6b6b",
-    fontSize: "1.5em",
-    verticalAlign: "middle",
-    marginRight: 6
-  }}>⚠️</span>
-);
+import { useToast } from "@chakra-ui/react";
+import Layout from "./component/Layout";
 
 const AdminQrScanner = () => {
   const videoRef = useRef(null);
-  const [result, setResult] = useState("");
-  const [error, setError] = useState("");
   const [candidate, setCandidate] = useState(null);
   const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
-  const toast = useToast();
-
-
+  const [error, setError] = useState("");
   const lastScanRef = useRef({ value: "", time: 0 });
+  const toast = useToast();
 
   useEffect(() => {
     const codeReader = new BrowserMultiFormatReader();
-
-    codeReader
-      .listVideoInputDevices()
-      .then((videoInputDevices) => {
-        if (videoInputDevices.length === 0) {
-          setError("No camera device found.");
-          return;
-        }
-        const selectedDeviceId = videoInputDevices[0].deviceId;
-
-        codeReader.decodeFromVideoDevice(
-          selectedDeviceId,
-          videoRef.current,
-          async (res, err) => {
-            if (res) {
-              const scannedText = res.getText();
-              setResult(scannedText);
-              setError("");
-              setStatus("");
-              setMessage("");
-              setCandidate(null);
-
-             
-              const now = Date.now();
-              if (
-                scannedText !== lastScanRef.current.value ||
-                now - lastScanRef.current.time > 1500
-              ) {
-                lastScanRef.current = { value: scannedText, time: now };
-                toast({
-                  title: "QR Code Scanned",
-                  // description: `Scanned code: ${scannedText}`,
-                  status: "success",
-                  duration: 1800,
-                  isClosable: true,
-                  position: "top",
-                });
-              }
-
-              try {
-                const response = await axios.post(
-                  "https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users/admin/attendance-scan",
-                  { token: scannedText }
-                );
-                setCandidate(response.data);
-                setStatus(response.data.status);
-                setMessage(response.data.message);
-              } catch (e) {
-                setCandidate(null);
-                setStatus("");
-                setMessage("");
-                setError(
-                  e.response?.data?.message ||
-                  e.message ||
-                  "Error fetching candidate details"
-                );
-              }
-            }
-            if (err && !(err instanceof NotFoundException)) {
-              setError(err.message || "QR scan error");
-            }
+    codeReader.listVideoInputDevices().then(devices => {
+      if (!devices.length) { setError("No camera found."); return; }
+      codeReader.decodeFromVideoDevice(devices[0].deviceId, videoRef.current, async (res, err) => {
+        if (res) {
+          const scannedText = res.getText();
+          const now = Date.now();
+          if (scannedText !== lastScanRef.current.value || now - lastScanRef.current.time > 1500) {
+            lastScanRef.current = { value: scannedText, time: now };
+            setError(""); setCandidate(null); setStatus(""); setMessage("");
+            toast({ title: "QR scanned", status: "success", duration: 1500, isClosable: true, position: "top" });
+            try {
+              const r = await axios.post("https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users/admin/attendance-scan", { token: scannedText });
+              setCandidate(r.data); setStatus(r.data.status); setMessage(r.data.message);
+            } catch (e) { setError(e.response?.data?.message || e.message || "Scan error"); }
           }
-        );
-      })
-      .catch((err) => setError(err.message));
-
-    return () => {
-      codeReader.reset();
-    };
+        }
+        if (err && !(err instanceof NotFoundException)) setError(err.message || "Scan error");
+      });
+    }).catch(e => setError(e.message));
+    return () => codeReader.reset();
   }, [toast]);
 
+  const isSuccess = status && status !== "already-marked";
+  const isWarning = status === "already-marked";
+
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(135deg, #f3f5f9 0%, #e9ecef 100%)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "24px"
-    }}>
-      <div style={{
-        background: "#fff",
-        borderRadius: "18px",
-        boxShadow: "0 6px 30px 0 rgba(0,0,0,0.15)",
-        padding: "32px 28px 40px 28px",
-        width: "100%",
-        maxWidth: "420px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center"
-      }}>
-        <h2 style={{
-          fontWeight: 700,
-          marginBottom: "18px",
-          letterSpacing: "0.5px",
-          color: "#222"
-        }}>Admin QR Scanner</h2>
-        <video
-          ref={videoRef}
-          style={{
-            width: "100%",
-            maxWidth: "360px",
-            height: "auto",
-            borderRadius: "12px",
-            border: "4px solid #e5eaf2",
-            marginBottom: "26px",
-            boxShadow: "0 2px 12px 0 rgba(44,62,80,0.07)"
-          }}
-        />
-        {result && (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            fontWeight: 700,
-            fontSize: "1.1em",
-            marginBottom: "16px",
-            color: "#222"
-          }}>
-            <SuccessIcon />
-           {/* <span>QR Code: <span style={{ fontWeight: 800, fontFamily: "monospace", letterSpacing: "0.5px" }}>{result}</span></span> */}
-          </div>
-        )}
+    <Layout>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px", maxWidth: 480, margin: "0 auto" }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#0FB6A6", marginBottom: 8 }}>Admin · QR Scanner</p>
+        <h2 style={{ fontSize: 24, fontWeight: 800, color: "#1C1440", marginBottom: 24 }}>Scan QR Code</h2>
+
+        {/* camera viewport */}
+        <div style={{ position: "relative", width: "100%", maxWidth: 360, marginBottom: 24 }}>
+          <video ref={videoRef} style={{ width: "100%", borderRadius: 16, border: "3px solid #4CD9CB", display: "block", background: "#0C0921" }} />
+          {/* corner markers */}
+          {["topLeft","topRight","bottomLeft","bottomRight"].map(pos => (
+            <div key={pos} style={{ position: "absolute", width: 28, height: 28,
+              borderTop: pos.startsWith("top") ? "3px solid #FFB020" : "none",
+              borderBottom: pos.startsWith("bottom") ? "3px solid #FFB020" : "none",
+              borderLeft: pos.endsWith("Left") ? "3px solid #FFB020" : "none",
+              borderRight: pos.endsWith("Right") ? "3px solid #FFB020" : "none",
+              top: pos.startsWith("top") ? 6 : "auto", bottom: pos.startsWith("bottom") ? 6 : "auto",
+              left: pos.endsWith("Left") ? 6 : "auto", right: pos.endsWith("Right") ? 6 : "auto",
+            }} />
+          ))}
+        </div>
+
+        {/* candidate card */}
         {candidate && (
-          <div style={{
-            marginBottom: "18px",
-            width: "100%",
-            background: "#f7fafd",
-            borderRadius: "12px",
-            boxShadow: "0 1.5px 6px 0 rgba(33, 204, 81, 0.04)",
-            padding: "18px 16px",
-            fontSize: "1.08em",
-            color: "#2d3748"
-          }}>
-            <div style={{marginBottom: 6}}><b>Name:</b> {candidate.name}</div>
-            {/* Uncomment for more details if available:
-            {candidate.email && <div style={{marginBottom: 6}}><b>Email:</b> {candidate.email}</div>}
-            {candidate.gender && <div style={{marginBottom: 6}}><b>Gender:</b> {candidate.gender}</div>}
-            {candidate.college && <div><b>College:</b> {candidate.college}</div>} */}
+          <div style={{ width: "100%", background: isWarning ? "#FFF8E8" : "#E5FBF8", border: `2px solid ${isWarning ? "#FFB020" : "#0FB6A6"}`, borderRadius: 16, padding: "20px 20px", marginBottom: 16 }}>
+            <p style={{ fontWeight: 800, fontSize: 18, color: "#1C1440", marginBottom: 6 }}>{candidate.name}</p>
+            {message && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 20 }}>{isWarning ? "⚠️" : "✅"}</span>
+                <p style={{ fontWeight: 700, color: isWarning ? "#CC7C00" : "#0A7268", fontSize: 15 }}>{message}</p>
+              </div>
+            )}
           </div>
         )}
-        {message && (
-          <div style={{
-            color: status === "already-marked" ? "#f44336" : "#21cc51",
-            fontWeight: 700,
-            fontSize: "1.05em",
-            marginBottom: "6px",
-            display: "flex",
-            alignItems: "center"
-          }}>
-            {status === "already-marked" ? <WarningIcon /> : <SuccessIcon />}
-            <span>{message}</span>
-          </div>
+
+        {/* idle state */}
+        {!candidate && !error && (
+          <p style={{ color: "#7E70B8", fontSize: 14, fontWeight: 500, textAlign: "center" }}>Point the camera at a participant's QR code</p>
         )}
+
+        {/* error */}
         {error && (
-          <div style={{
-            color: "#f44336",
-            fontWeight: 600,
-            marginTop: "18px",
-            fontSize: "1em"
-          }}>
-            <WarningIcon />
-            {error}
+          <div style={{ background: "#FEE9F2", border: "2px solid #F2478B", borderRadius: 12, padding: "14px 18px", width: "100%", textAlign: "center" }}>
+            <span style={{ fontSize: 20 }}>⚠️</span>
+            <p style={{ color: "#8F1747", fontWeight: 700, marginTop: 4 }}>{error}</p>
           </div>
         )}
       </div>
-    </div>
+    </Layout>
   );
 };
 
