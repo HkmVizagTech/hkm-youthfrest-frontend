@@ -295,54 +295,51 @@ const Main = () => {
     { label: "Entry ₹49", icon: "🎟️" },
   ];
 
+  const accentMap = {
+    "Cultural Events": { bg: "lotus.50", fg: "lotus.500" },
+    "Youth Connect": { bg: "peacock.50", fg: "peacock.600" },
+    "2-Hour Experience": { bg: "marigold.50", fg: "marigold.600" },
+    "Entry ₹49": { bg: "saffron.50", fg: "saffron.600" },
+  };
+
   return (
-    <Box bg="night.900" minH="100vh">
+    <Box bg="#FFFCF6" minH="100vh">
       {/* ── Hero ─────────────────────────────────────────── */}
       <Box
         position="relative"
         overflow="hidden"
-        bgGradient="linear(to-b, night.800, night.900)"
-        pt={{ base: 12, md: 16 }}
+        bgGradient="linear(to-b, #FFF4E0, #FFFCF6)"
+        pt={{ base: 10, md: 14 }}
         pb={{ base: 24, md: 28 }}
         px={4}
       >
-        {/* peacock-eye glow blobs */}
-        <Box
-          className="kp-blob"
-          position="absolute"
-          top="-80px"
-          left="-60px"
-          w="320px"
-          h="320px"
-          bgGradient="radial(peacock.400, transparent 70%)"
-          filter="blur(20px)"
-          opacity={0.5}
-          pointerEvents="none"
-        />
-        <Box
-          className="kp-blob"
-          position="absolute"
-          bottom="-40px"
-          right="-50px"
-          w="300px"
-          h="300px"
-          bgGradient="radial(lotus.400, transparent 70%)"
-          filter="blur(20px)"
-          opacity={0.45}
-          pointerEvents="none"
-        />
+        {/* playful soft color blobs */}
+        <Box position="absolute" top="-60px" left="-40px" w="260px" h="260px" bgGradient="radial(peacock.200, transparent 70%)" filter="blur(10px)" opacity={0.55} pointerEvents="none" />
+        <Box position="absolute" top="20px" right="-50px" w="240px" h="240px" bgGradient="radial(lotus.100, transparent 70%)" filter="blur(10px)" opacity={0.7} pointerEvents="none" />
+        <Box position="absolute" bottom="40px" left="10%" w="160px" h="160px" bgGradient="radial(marigold.100, transparent 70%)" filter="blur(8px)" opacity={0.6} pointerEvents="none" />
+
+        {/* floating confetti dots */}
+        <Box className="kp-float" position="absolute" top="80px" left="16%" boxSize="12px" borderRadius="full" bg="lotus.300" opacity={0.7} pointerEvents="none" />
+        <Box className="kp-float" position="absolute" top="140px" right="20%" boxSize="9px" borderRadius="full" bg="peacock.400" opacity={0.7} pointerEvents="none" style={{ animationDelay: "1.2s" }} />
+        <Box className="kp-float" position="absolute" top="48px" right="32%" boxSize="7px" borderRadius="full" bg="marigold.400" opacity={0.8} pointerEvents="none" style={{ animationDelay: "0.6s" }} />
 
         <Container maxW="3xl" position="relative" textAlign="center">
-          <Text
-            fontSize="xs"
-            letterSpacing="0.32em"
-            fontWeight={700}
-            color="peacock.300"
-            textTransform="uppercase"
+          <Box
+            display="inline-flex"
+            alignItems="center"
+            gap={2}
+            bg="white"
+            px={4}
+            py={1.5}
+            borderRadius="full"
+            boxShadow="0 4px 14px -6px rgba(0,0,0,0.18)"
             mb={6}
           >
-            Hare Krishna Movement · Visakhapatnam
-          </Text>
+            <Box boxSize="7px" borderRadius="full" bg="peacock.500" />
+            <Text fontSize="xs" letterSpacing="0.18em" fontWeight={700} color="night.600" textTransform="uppercase">
+              Hare Krishna Movement · Vizag
+            </Text>
+          </Box>
 
           <Box
             className="kp-float"
@@ -351,64 +348,46 @@ const Main = () => {
             boxSize={{ base: "104px", md: "120px" }}
             borderRadius="full"
             overflow="hidden"
-            border="3px solid"
-            borderColor="marigold.400"
-            boxShadow="0 0 40px -8px rgba(255,176,32,0.6)"
+            border="4px solid white"
+            boxShadow="0 12px 30px -10px rgba(242,71,139,0.4)"
           >
-            <Image
-              src={image12}
-              alt="Krishna Pulse"
-              objectFit="cover"
-              w="100%"
-              h="100%"
-            />
+            <Image src={image12} alt="Krishna Pulse" objectFit="cover" w="100%" h="100%" />
           </Box>
 
           <Heading
             as="h1"
             fontWeight={800}
-            lineHeight={0.95}
-            letterSpacing="-0.02em"
-            color="white"
-            fontSize={{ base: "5xl", md: "7xl" }}
+            lineHeight={0.92}
+            letterSpacing="-0.025em"
+            color="night.800"
+            fontSize={{ base: "6xl", md: "8xl" }}
           >
             Krishna{" "}
-            <Box
-              as="span"
-              bgGradient="linear(to-r, marigold.400, saffron.500, lotus.400)"
-              bgClip="text"
-            >
+            <Box as="span" bgGradient="linear(to-r, saffron.500, lotus.500)" bgClip="text">
               Pulse
             </Box>
           </Heading>
           <Text
             mt={2}
             fontWeight={700}
-            letterSpacing="0.18em"
+            letterSpacing="0.2em"
             textTransform="uppercase"
-            color="whiteAlpha.800"
+            color="night.400"
             fontSize={{ base: "sm", md: "md" }}
           >
             Youth Festival
           </Text>
-          <Text mt={4} color="whiteAlpha.700" fontSize={{ base: "md", md: "lg" }}>
+          <Text mt={4} color="night.600" fontSize={{ base: "lg", md: "xl" }} fontWeight={500}>
             A Fest of Fun, Faith &amp; Freedom
           </Text>
 
           {/* signature pulse waveform */}
-          <Box mt={8} mx="auto" maxW="520px" opacity={0.9}>
-            <svg
-              className="kp-pulse-line"
-              viewBox="0 0 520 60"
-              fill="none"
-              width="100%"
-              height="48"
-              aria-hidden="true"
-            >
+          <Box mt={8} mx="auto" maxW="520px">
+            <svg className="kp-pulse-line" viewBox="0 0 520 60" fill="none" width="100%" height="48" aria-hidden="true">
               <path
                 d="M0 30 H120 l12 -22 l14 44 l12 -34 l10 22 H300 l14 -28 l12 44 l10 -28 H520"
                 stroke="url(#kpgrad)"
-                strokeWidth="3"
+                strokeWidth="3.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -427,49 +406,52 @@ const Main = () => {
       {/* ── Registration pass ────────────────────────────── */}
       <Container maxW="2xl" px={4} pb={16} mt={{ base: -16, md: -20 }}>
         {/* fact strip */}
-        <SimpleGrid
-          columns={{ base: 2, md: 4 }}
-          spacing={3}
-          mb={6}
-          position="relative"
-          zIndex={1}
-        >
-          {facts.map((f) => (
-            <VStack
-              key={f.label}
-              bg="whiteAlpha.900"
-              backdropFilter="blur(6px)"
-              borderRadius="xl"
-              py={3}
-              spacing={1}
-              boxShadow="0 8px 24px -16px rgba(0,0,0,0.6)"
-            >
-              <Text fontSize="xl">{f.icon}</Text>
-              <Text fontSize="xs" fontWeight={700} color="night.700">
-                {f.label}
-              </Text>
-            </VStack>
-          ))}
+        <SimpleGrid columns={{ base: 2, md: 4 }} spacing={3} mb={6} position="relative" zIndex={1}>
+          {facts.map((f) => {
+            const a = accentMap[f.label] || { bg: "gray.50", fg: "gray.600" };
+            return (
+              <VStack
+                key={f.label}
+                bg="white"
+                borderRadius="2xl"
+                py={4}
+                spacing={2}
+                boxShadow="0 10px 30px -20px rgba(0,0,0,0.5)"
+                border="1px solid"
+                borderColor="blackAlpha.50"
+              >
+                <Flex align="center" justify="center" boxSize="40px" borderRadius="full" bg={a.bg}>
+                  <Text fontSize="lg">{f.icon}</Text>
+                </Flex>
+                <Text fontSize="xs" fontWeight={700} color={a.fg}>
+                  {f.label}
+                </Text>
+              </VStack>
+            );
+          })}
         </SimpleGrid>
 
         <Box
-          bg="cream"
-          borderRadius="2xl"
+          bg="white"
+          borderRadius="3xl"
           overflow="hidden"
-          boxShadow="0 30px 60px -25px rgba(12,9,33,0.7)"
+          boxShadow="0 30px 70px -30px rgba(20,16,46,0.35)"
+          border="1px solid"
+          borderColor="blackAlpha.50"
         >
           {/* pass top accent */}
-          <Box h="6px" bgGradient="linear(to-r, peacock.500, marigold.400, lotus.400)" />
+          <Box h="7px" bgGradient="linear(to-r, peacock.500, marigold.400, saffron.500, lotus.500)" />
 
           <Box px={{ base: 6, md: 10 }} pt={8} pb={4} textAlign="center">
             <Heading size="lg" color="night.800" letterSpacing="-0.01em">
-              Claim your pass
+              Grab your spot 🎉
             </Heading>
             <Text color="night.500" mt={2} fontSize="sm">
-              <Text as="span" color="lotus.500">
+              Fill in your details — fields marked{" "}
+              <Text as="span" color="lotus.500" fontWeight={700}>
                 *
               </Text>{" "}
-              indicates a required field
+              are required.
             </Text>
           </Box>
 
@@ -477,96 +459,49 @@ const Main = () => {
             <VStack spacing={5} align="stretch">
               <FormControl isInvalid={!!errors.name}>
                 <FormLabel>
-                  Name{" "}
-                  <Text as="span" color="lotus.500">
-                    *
-                  </Text>
+                  Name <Text as="span" color="lotus.500">*</Text>
                 </FormLabel>
-                <Input
-                  placeholder="Your full name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                />
+                <Input placeholder="Your full name" value={formData.name} onChange={(e) => handleInputChange("name", e.target.value)} />
                 <FormErrorMessage>{errors.name}</FormErrorMessage>
               </FormControl>
 
               <FormControl isInvalid={!!errors.dob}>
                 <FormLabel>
-                  Date of Birth{" "}
-                  <Text as="span" color="lotus.500">
-                    *
-                  </Text>
+                  Date of Birth <Text as="span" color="lotus.500">*</Text>
                 </FormLabel>
-                <Input
-                  type="date"
-                  value={formData.dob}
-                  onChange={(e) => handleInputChange("dob", e.target.value)}
-                />
+                <Input type="date" value={formData.dob} onChange={(e) => handleInputChange("dob", e.target.value)} />
                 <FormErrorMessage>{errors.dob}</FormErrorMessage>
               </FormControl>
 
               <FormControl isInvalid={!!errors.whatsappNumber}>
                 <FormLabel>
-                  WhatsApp Number{" "}
-                  <Text as="span" color="lotus.500">
-                    *
-                  </Text>
+                  WhatsApp Number <Text as="span" color="lotus.500">*</Text>
                 </FormLabel>
                 <InputGroup>
-                  <InputLeftAddon
-                    bg="night.50"
-                    borderColor="blackAlpha.200"
-                    color="night.700"
-                    fontWeight={600}
-                  >
+                  <InputLeftAddon bg="saffron.50" borderColor="blackAlpha.200" color="saffron.700" fontWeight={700}>
                     +91
                   </InputLeftAddon>
-                  <Input
-                    type="tel"
-                    placeholder="Your WhatsApp number"
-                    value={formData.whatsappNumber}
-                    onChange={(e) =>
-                      handleInputChange("whatsappNumber", e.target.value)
-                    }
-                  />
+                  <Input type="tel" placeholder="Your WhatsApp number" value={formData.whatsappNumber} onChange={(e) => handleInputChange("whatsappNumber", e.target.value)} />
                 </InputGroup>
                 <FormErrorMessage>{errors.whatsappNumber}</FormErrorMessage>
               </FormControl>
 
               <FormControl isInvalid={!!errors.email}>
                 <FormLabel>
-                  Email{" "}
-                  <Text as="span" color="lotus.500">
-                    *
-                  </Text>
+                  Email <Text as="span" color="lotus.500">*</Text>
                 </FormLabel>
-                <Input
-                  type="email"
-                  placeholder="your.email@example.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                />
+                <Input type="email" placeholder="your.email@example.com" value={formData.email} onChange={(e) => handleInputChange("email", e.target.value)} />
                 <FormErrorMessage>{errors.email}</FormErrorMessage>
               </FormControl>
 
               <FormControl isInvalid={!!errors.gender}>
                 <FormLabel>
-                  Gender{" "}
-                  <Text as="span" color="lotus.500">
-                    *
-                  </Text>
+                  Gender <Text as="span" color="lotus.500">*</Text>
                 </FormLabel>
-                <RadioGroup
-                  value={formData.gender}
-                  onChange={(val) => handleInputChange("gender", val)}
-                >
+                <RadioGroup value={formData.gender} onChange={(val) => handleInputChange("gender", val)}>
                   <HStack spacing={6}>
-                    <Radio value="Male" colorScheme="peacock">
-                      Male
-                    </Radio>
-                    <Radio value="Female" colorScheme="peacock">
-                      Female
-                    </Radio>
+                    <Radio value="Male" colorScheme="peacock">Male</Radio>
+                    <Radio value="Female" colorScheme="peacock">Female</Radio>
                   </HStack>
                 </RadioGroup>
                 <FormErrorMessage>{errors.gender}</FormErrorMessage>
@@ -574,18 +509,9 @@ const Main = () => {
 
               <FormControl isInvalid={!!errors.collegeOrWorking}>
                 <FormLabel>
-                  College / Working Professional{" "}
-                  <Text as="span" color="lotus.500">
-                    *
-                  </Text>
+                  College / Working Professional <Text as="span" color="lotus.500">*</Text>
                 </FormLabel>
-                <ChakraSelect
-                  placeholder="--Select--"
-                  value={formData.collegeOrWorking}
-                  onChange={(e) =>
-                    handleInputChange("collegeOrWorking", e.target.value)
-                  }
-                >
+                <ChakraSelect placeholder="--Select--" value={formData.collegeOrWorking} onChange={(e) => handleInputChange("collegeOrWorking", e.target.value)}>
                   <option value="College">College</option>
                   <option value="Working">Working</option>
                 </ChakraSelect>
@@ -595,18 +521,9 @@ const Main = () => {
               {formData.collegeOrWorking === "Working" && (
                 <FormControl isInvalid={!!errors.companyName}>
                   <FormLabel>
-                    Company Name{" "}
-                    <Text as="span" color="lotus.500">
-                      *
-                    </Text>
+                    Company Name <Text as="span" color="lotus.500">*</Text>
                   </FormLabel>
-                  <Input
-                    placeholder="Your company name"
-                    value={formData.companyName}
-                    onChange={(e) =>
-                      handleInputChange("companyName", e.target.value)
-                    }
-                  />
+                  <Input placeholder="Your company name" value={formData.companyName} onChange={(e) => handleInputChange("companyName", e.target.value)} />
                   <FormErrorMessage>{errors.companyName}</FormErrorMessage>
                 </FormControl>
               )}
@@ -614,33 +531,20 @@ const Main = () => {
               {formData.collegeOrWorking === "College" && (
                 <FormControl isInvalid={!!errors.college}>
                   <FormLabel>
-                    College Name{" "}
-                    <Text as="span" color="lotus.500">
-                      *
-                    </Text>
+                    College Name <Text as="span" color="lotus.500">*</Text>
                   </FormLabel>
                   <Box>
                     <Select
                       options={collegeOptions}
-                      value={collegeOptions.find(
-                        (opt) => opt.value === formData.college
-                      )}
-                      onChange={(option) => {
-                        handleInputChange("college", option?.value || "");
-                      }}
+                      value={collegeOptions.find((opt) => opt.value === formData.college)}
+                      onChange={(option) => handleInputChange("college", option?.value || "")}
                       placeholder="Select your college"
                       isClearable
                       styles={customSelectStyles}
                     />
                   </Box>
-
                   {formData.college === "Other College" && (
-                    <Input
-                      mt={2}
-                      placeholder="Enter your college name"
-                      value={otherCollege}
-                      onChange={(e) => setOtherCollege(e.target.value)}
-                    />
+                    <Input mt={2} placeholder="Enter your college name" value={otherCollege} onChange={(e) => setOtherCollege(e.target.value)} />
                   )}
                   <FormErrorMessage>{errors.college}</FormErrorMessage>
                 </FormControl>
@@ -649,16 +553,9 @@ const Main = () => {
               {formData.collegeOrWorking === "College" && (
                 <FormControl isInvalid={!!errors.course}>
                   <FormLabel>
-                    Course{" "}
-                    <Text as="span" color="lotus.500">
-                      *
-                    </Text>
+                    Course <Text as="span" color="lotus.500">*</Text>
                   </FormLabel>
-                  <Input
-                    placeholder="e.g., B.Tech, MBA"
-                    value={formData.course}
-                    onChange={(e) => handleInputChange("course", e.target.value)}
-                  />
+                  <Input placeholder="e.g., B.Tech, MBA" value={formData.course} onChange={(e) => handleInputChange("course", e.target.value)} />
                   <FormErrorMessage>{errors.course}</FormErrorMessage>
                 </FormControl>
               )}
@@ -666,16 +563,9 @@ const Main = () => {
               {formData.collegeOrWorking === "College" && (
                 <FormControl isInvalid={!!errors.year}>
                   <FormLabel>
-                    Year{" "}
-                    <Text as="span" color="lotus.500">
-                      *
-                    </Text>
+                    Year <Text as="span" color="lotus.500">*</Text>
                   </FormLabel>
-                  <ChakraSelect
-                    placeholder="--Select Year--"
-                    value={formData.year}
-                    onChange={(e) => handleInputChange("year", e.target.value)}
-                  >
+                  <ChakraSelect placeholder="--Select Year--" value={formData.year} onChange={(e) => handleInputChange("year", e.target.value)}>
                     <option value="1">1st</option>
                     <option value="2">2nd</option>
                     <option value="3">3rd</option>
@@ -687,17 +577,12 @@ const Main = () => {
 
               <FormControl isInvalid={!!errors.slot}>
                 <FormLabel>
-                  Slot{" "}
-                  <Text as="span" color="lotus.500">
-                    *
-                  </Text>
+                  Slot <Text as="span" color="lotus.500">*</Text>
                 </FormLabel>
                 <Select
                   options={slotOptions}
                   value={slotOptions.find((opt) => opt.value === formData.slot)}
-                  onChange={(option) =>
-                    handleInputChange("slot", option?.value || "")
-                  }
+                  onChange={(option) => handleInputChange("slot", option?.value || "")}
                   placeholder="Select your slot"
                   isClearable
                   styles={customSelectStyles}
@@ -705,30 +590,13 @@ const Main = () => {
                 <FormErrorMessage>{errors.slot}</FormErrorMessage>
               </FormControl>
 
-              <Button
-                onClick={handlePayment}
-                isLoading={isSubmitting}
-                loadingText="Processing"
-                variant="pulse"
-                size="lg"
-                py={7}
-                w="full"
-                isDisabled={isSubmitting}
-                type="button"
-                mt={2}
-              >
-                Register now — ₹49
+              <Button onClick={handlePayment} isLoading={isSubmitting} loadingText="Processing" variant="pulse" size="lg" py={7} w="full" isDisabled={isSubmitting} type="button" mt={2} fontSize="md">
+                Register now — just ₹49
               </Button>
 
               <Text textAlign="center" fontSize="sm" color="night.500">
                 Questions? Write to{" "}
-                <Text
-                  as="a"
-                  href="mailto:krishnapulse@gmail.com"
-                  color="peacock.600"
-                  fontWeight={600}
-                  textDecoration="underline"
-                >
+                <Text as="a" href="mailto:krishnapulse@gmail.com" color="peacock.600" fontWeight={600} textDecoration="underline">
                   krishnapulse@gmail.com
                 </Text>
               </Text>
