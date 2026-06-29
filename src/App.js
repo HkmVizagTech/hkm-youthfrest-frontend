@@ -28,7 +28,7 @@ function App() {
   return (
     <ChakraProvider theme={theme}>
       <Routes>
-      <Route path='/' element={<FestivalNotice/>}/>
+      <Route path='/' element={<Main/>}/>
   <Route path='/send' element={<SendCertificate/>}/>
       <Route path='/admin/adminqrscanner' element={
         <ProtectedRoute allowedRoles={["user", "admin"]}>
