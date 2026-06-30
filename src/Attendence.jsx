@@ -1,3 +1,4 @@
+import { API_HOST } from "./config";
 import React, { useState } from "react";
 import { Box, Button, FormControl, FormLabel, Input, InputGroup, InputLeftAddon, FormErrorMessage, Text, Flex, Link } from "@chakra-ui/react";
 import { QRCodeSVG } from "qrcode.react";
@@ -18,7 +19,7 @@ const Attendence = () => {
     if (!/^\d{10}$/.test(trimmed)) { setError("Enter a valid 10-digit number."); return; }
     setLoading(true);
     try {
-      const res = await fetch("https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users/mark-attendance", {
+      const res = await fetch(`${API_HOST}/users/mark-attendance`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ whatsappNumber: trimmed }),
       });

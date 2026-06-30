@@ -1,3 +1,4 @@
+import { API_HOST } from "./config";
 import React, { useState } from "react";
 import {
   Box,
@@ -30,7 +31,7 @@ const Register = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await fetch("https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/admin/users/register", {
+      const res = await fetch(`${API_HOST}/admin/users/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

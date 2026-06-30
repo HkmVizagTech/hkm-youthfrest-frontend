@@ -1,3 +1,4 @@
+import { API_HOST } from "./config";
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Center, Flex, Heading, Icon, Image, Text, VStack, HStack, Spinner, Link, SimpleGrid } from '@chakra-ui/react';
 import { CheckCircle, Calendar, MapPin, Phone, Mail, ArrowLeft } from 'lucide-react';
@@ -5,7 +6,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import krishnaPulseLogo from './component/image.png';
 
-const API_BASE = 'https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users';
+const API_BASE = `${API_HOST}/users`;
 
 export default function ThankYouPage() {
   const { id } = useParams();

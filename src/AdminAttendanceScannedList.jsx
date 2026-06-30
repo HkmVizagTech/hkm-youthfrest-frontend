@@ -1,3 +1,4 @@
+import { API_HOST } from "./config";
 import React, { useEffect, useState } from "react";
 import { Box, Heading, Table, Thead, Tbody, Tr, Th, Td, Spinner, Input, Flex, FormControl, FormLabel, Tag, Tooltip, Text, HStack, Badge, Select, Button } from "@chakra-ui/react";
 import { CheckCircleIcon, PhoneIcon, DownloadIcon } from "@chakra-ui/icons";
@@ -15,7 +16,7 @@ const AdminAttendanceScannedList = () => {
   const [timeFilter, setTimeFilter] = useState("");
 
   useEffect(() => {
-    fetch("https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users/admin/scanned-list")
+    fetch(`${API_HOST}/users/admin/scanned-list`)
       .then(r => r.json()).then(d => { setData(d); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);

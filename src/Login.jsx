@@ -1,8 +1,9 @@
+import { API_HOST } from "./config";
 import React, { useState } from "react";
 import { Box, Button, FormControl, FormLabel, Input, VStack, Text, useToast } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
-const API = "https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/admin/users/login";
+const API = `${API_HOST}/admin/users/login`;
 
 const Login = () => {
   const navigate = useNavigate();

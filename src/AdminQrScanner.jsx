@@ -1,3 +1,4 @@
+import { API_HOST } from "./config";
 import React, { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader, NotFoundException } from "@zxing/library";
 import axios from "axios";
@@ -26,7 +27,7 @@ const AdminQrScanner = () => {
             setError(""); setCandidate(null); setStatus(""); setMessage("");
             toast({ title: "QR scanned", status: "success", duration: 1500, isClosable: true, position: "top" });
             try {
-              const r = await axios.post("https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users/admin/attendance-scan", { token: scannedText });
+              const r = await axios.post(`${API_HOST}/users/admin/attendance-scan`, { token: scannedText });
               setCandidate(r.data); setStatus(r.data.status); setMessage(r.data.message);
             } catch (e) { setError(e.response?.data?.message || e.message || "Scan error"); }
           }

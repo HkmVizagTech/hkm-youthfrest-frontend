@@ -1,3 +1,4 @@
+import { API_HOST } from "./config";
 import React, { useState, useEffect } from "react";
 import image12 from "./component/image.png";
 import {
@@ -50,7 +51,7 @@ const slotOptions = [
 
 const RAZORPAY_KEY = "rzp_live_HBAc3tlMK0X5Xd";
 const API_BASE =
-  "https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users";
+  `${API_HOST}/users`;
 
 const Main = () => {
   const toast = useToast();

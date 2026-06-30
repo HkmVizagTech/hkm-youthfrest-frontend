@@ -1,3 +1,4 @@
+import { API_HOST } from "../config";
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -82,7 +83,7 @@ const SendCertificate = () => {
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
 
-  const API_BASE_URL = 'https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users';
+  const API_BASE_URL = `${API_HOST}/users`;
 
 
   const safeToLowerCase = (value) => {

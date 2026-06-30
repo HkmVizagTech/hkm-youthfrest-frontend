@@ -1,3 +1,4 @@
+import { API_HOST } from "./config";
 import React, { useEffect, useState } from "react";
 import { Box, Heading, Select, Table, Thead, Tbody, Tr, Th, Td, Button, Spinner, Input, Flex, FormControl, FormLabel, Tag, Tooltip, Text, HStack, Badge, chakra } from "@chakra-ui/react";
 import { CheckCircleIcon, WarningIcon, DownloadIcon, PhoneIcon, TimeIcon } from "@chakra-ui/icons";
@@ -19,7 +20,7 @@ const CandidateExport = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("https://hkm-youtfrest-backend-razorpay-882278565284.asia-south1.run.app/users")
+    fetch(`${API_HOST}/users`)
       .then(r => r.json()).then(d => { setData(d.candidates || []); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
