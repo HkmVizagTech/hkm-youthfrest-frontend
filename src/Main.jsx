@@ -167,7 +167,7 @@ const Main = () => {
     setIsSubmitting(true);
     try {
       // Amount in paise for Razorpay
-      const amountInPaise = 1 * 100; // TEMP: testing — was 49
+      const amountInPaise = 49 * 100;
 
       const orderRes = await fetch(`${API_BASE}/create-order`, {
         method: "POST",
@@ -293,14 +293,14 @@ const Main = () => {
     { label: "Cultural Events", icon: "🎭" },
     { label: "Youth Connect", icon: "🫶" },
     { label: "2-Hour Experience", icon: "⏱️" },
-    { label: "Entry ₹1", icon: "🎟️" },
+    { label: "Entry ₹49", icon: "🎟️" },
   ];
 
   const accentMap = {
     "Cultural Events": { bg: "lotus.50", fg: "lotus.500" },
     "Youth Connect": { bg: "peacock.50", fg: "peacock.600" },
     "2-Hour Experience": { bg: "marigold.50", fg: "marigold.600" },
-    "Entry ₹1": { bg: "saffron.50", fg: "saffron.600" },
+    "Entry ₹49": { bg: "saffron.50", fg: "saffron.600" },
   };
 
   return (
@@ -595,7 +595,7 @@ const Main = () => {
               </FormControl>
 
               <Button onClick={handlePayment} isLoading={isSubmitting} loadingText="Processing" variant="pulse" size="lg" py={7} w="full" isDisabled={isSubmitting} type="button" mt={2} fontSize="md">
-                Register now — just ₹1
+                Register now — just ₹49
               </Button>
 
               <Text textAlign="center" fontSize="sm" color="night.500">
