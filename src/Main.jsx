@@ -49,7 +49,7 @@ const slotOptions = [
   { value: "Evening", label: "Evening (5PM - 7PM)" },
 ];
 
-const RAZORPAY_KEY = "rzp_live_HBAc3tlMK0X5Xd";
+const RAZORPAY_KEY = "rzp_live_SJXMnvdq896pe1";
 const API_BASE =
   `${API_HOST}/users`;
 
