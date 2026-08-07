@@ -52,6 +52,7 @@ const CandidateExport = () => {
       "Payment Status": r.paymentStatus, "Payment Method": r.paymentMethod,
       "Registration Date": r.registrationDate ? new Date(r.registrationDate).toLocaleString() : "",
       Attendance: r.attendance ? "Yes" : "No", "Receipt No": r.receipt,
+      "UTM Source": r.utmSource || "", "UTM Medium": r.utmMedium || "", "UTM Campaign": r.utmCampaign || "",
     })));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Candidates");

@@ -26,7 +26,7 @@ import {
 } from "@chakra-ui/react";
 import Select from "react-select";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const initialState = {
   serialNo: "",
@@ -56,11 +56,20 @@ const API_BASE =
 const Main = () => {
   const toast = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [collegeOptions, setCollegeOptions] = useState([]);
   const [formData, setFormData] = useState(initialState);
   const [otherCollege, setOtherCollege] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const utmData = {
+    utmSource: searchParams.get("utm_source") || "",
+    utmMedium: searchParams.get("utm_medium") || "",
+    utmCampaign: searchParams.get("utm_campaign") || "",
+    utmTerm: searchParams.get("utm_term") || "",
+    utmContent: searchParams.get("utm_content") || "",
+  };
 
   useEffect(() => {
     if (!window.Razorpay) {
@@ -156,6 +165,7 @@ const Main = () => {
   const handlePayment = async () => {
     const finalFormData = {
       ...formData,
+      ...utmData,
       college:
         formData.collegeOrWorking === "College" &&
         formData.college === "Other College"
