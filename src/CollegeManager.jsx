@@ -3,8 +3,9 @@ import { Box, Input, Button, Stack, HStack, Text, useToast, IconButton, Flex, He
 import { EditIcon, DeleteIcon, CheckIcon, AddIcon } from '@chakra-ui/icons';
 import axios from 'axios';
 import Layout from './component/Layout';
+import { API_HOST } from "./config";
 
-const API_URL = 'https://vrc-server-110406681774.asia-south1.run.app/college';
+const API_URL = `${API_HOST}/college`;
 
 const CollegeManager = () => {
   const [colleges, setColleges] = useState([]);

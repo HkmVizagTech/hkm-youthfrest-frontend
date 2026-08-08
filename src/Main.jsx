@@ -87,7 +87,7 @@ const Main = () => {
     const fetchColleges = async () => {
       try {
         const res = await axios.get(
-          "https://vrc-server-110406681774.asia-south1.run.app/college"
+          `${API_HOST}/college`
         );
         const options = res.data.map((college) => ({
           label: college.name,
