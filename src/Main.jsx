@@ -25,6 +25,7 @@ import {
   SimpleGrid,
 } from "@chakra-ui/react";
 import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -59,7 +60,6 @@ const Main = () => {
   const [searchParams] = useSearchParams();
   const [collegeOptions, setCollegeOptions] = useState([]);
   const [formData, setFormData] = useState(initialState);
-  const [otherCollege, setOtherCollege] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -94,7 +94,6 @@ const Main = () => {
           value: college.name,
         }));
 
-        options.push({ label: "Other College", value: "Other College" });
         setCollegeOptions(options);
       } catch (err) {
         console.error("Failed to fetch colleges:", err);
@@ -108,10 +107,21 @@ const Main = () => {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
+  };
 
-    if (field === "college" && value !== "Other College") {
-      setOtherCollege("");
+  // Age is computed from DOB using calendar-accurate math (accounts for
+  // whether the birthday has occurred yet this year).
+  const calculateAge = (dobString) => {
+    if (!dobString) return null;
+    const dob = new Date(dobString);
+    if (isNaN(dob.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
     }
+    return age;
   };
 
   const validateForm = () => {
@@ -131,7 +141,16 @@ const Main = () => {
     } = formData;
 
     if (!name.trim()) newErrors.name = "Name is required";
-    if (!dob) newErrors.dob = "Date of birth is required";
+    if (!dob) {
+      newErrors.dob = "Date of birth is required";
+    } else {
+      const age = calculateAge(dob);
+      if (age === null) {
+        newErrors.dob = "Enter a valid date of birth";
+      } else if (age > 30) {
+        newErrors.dob = "Sorry, this event is only open to participants aged 30 or under";
+      }
+    }
     if (!whatsappNumber.trim()) {
       newErrors.whatsappNumber = "WhatsApp number is required";
     } else if (!/^\d{10}$/.test(whatsappNumber.replace(/\D/g, ""))) {
@@ -146,13 +165,6 @@ const Main = () => {
       newErrors.companyName = "Company name is required";
     if (collegeOrWorking === "College" && !college.trim())
       newErrors.college = "College name is required";
-    if (
-      collegeOrWorking === "College" &&
-      college === "Other College" &&
-      !otherCollege.trim()
-    ) {
-      newErrors.college = "Please enter your college name";
-    }
     if (collegeOrWorking === "College" && !course.trim())
       newErrors.course = "Course is required";
     if (collegeOrWorking === "College" && !year) newErrors.year = "Year is required";
@@ -166,11 +178,6 @@ const Main = () => {
     const finalFormData = {
       ...formData,
       ...utmData,
-      college:
-        formData.collegeOrWorking === "College" &&
-        formData.college === "Other College"
-          ? otherCollege
-          : formData.college,
     };
 
     if (!validateForm()) return;
@@ -484,6 +491,11 @@ const Main = () => {
                   Date of Birth <Text as="span" color="lotus.500">*</Text>
                 </FormLabel>
                 <Input type="date" value={formData.dob} onChange={(e) => handleInputChange("dob", e.target.value)} />
+                {!errors.dob && formData.dob && calculateAge(formData.dob) !== null && (
+                  <Text fontSize="xs" color="night.400" mt={1.5}>
+                    Age: {calculateAge(formData.dob)} · Eligible up to 30 years
+                  </Text>
+                )}
                 <FormErrorMessage>{errors.dob}</FormErrorMessage>
               </FormControl>
 
@@ -548,18 +560,20 @@ const Main = () => {
                     College Name <Text as="span" color="lotus.500">*</Text>
                   </FormLabel>
                   <Box>
-                    <Select
+                    <CreatableSelect
                       options={collegeOptions}
-                      value={collegeOptions.find((opt) => opt.value === formData.college)}
+                      value={formData.college ? { label: formData.college, value: formData.college } : null}
                       onChange={(option) => handleInputChange("college", option?.value || "")}
-                      placeholder="Select your college"
+                      onCreateOption={(inputValue) => handleInputChange("college", inputValue)}
+                      placeholder="Select your college or type to add your own"
+                      formatCreateLabel={(inputValue) => `Use "${inputValue}"`}
                       isClearable
                       styles={customSelectStyles}
                     />
                   </Box>
-                  {formData.college === "Other College" && (
-                    <Input mt={2} placeholder="Enter your college name" value={otherCollege} onChange={(e) => setOtherCollege(e.target.value)} />
-                  )}
+                  <Text fontSize="xs" color="night.400" mt={1.5}>
+                    Don't see your college? Just type its name.
+                  </Text>
                   <FormErrorMessage>{errors.college}</FormErrorMessage>
                 </FormControl>
               )}
