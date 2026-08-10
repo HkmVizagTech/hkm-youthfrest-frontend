@@ -62,6 +62,7 @@ const Main = () => {
   const [formData, setFormData] = useState(initialState);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [razorpayReady, setRazorpayReady] = useState(!!window.Razorpay);
 
   const utmData = {
     utmSource: searchParams.get("utm_source") || "",
@@ -72,15 +73,19 @@ const Main = () => {
   };
 
   useEffect(() => {
-    if (!window.Razorpay) {
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.async = true;
-      document.body.appendChild(script);
-      return () => {
-        document.body.removeChild(script);
-      };
+    if (window.Razorpay) {
+      setRazorpayReady(true);
+      return;
     }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => setRazorpayReady(true);
+    script.onerror = () => setRazorpayReady(false);
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   useEffect(() => {
@@ -174,6 +179,22 @@ const Main = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Retries a fetch a few times with a short backoff — used for the
+  // post-payment verification call, where a transient network blip should
+  // not be mistaken for a failed payment (Razorpay has already charged the
+  // customer by the time this runs).
+  const fetchWithRetry = async (url, options, retries = 2, delayMs = 1500) => {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const res = await fetch(url, options);
+        if (res.ok || attempt === retries) return res;
+      } catch (err) {
+        if (attempt === retries) throw err;
+      }
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  };
+
   const handlePayment = async () => {
     const finalFormData = {
       ...formData,
@@ -181,6 +202,18 @@ const Main = () => {
     };
 
     if (!validateForm()) return;
+
+    if (!razorpayReady) {
+      toast({
+        title: "Payment gateway is still loading",
+        description: "Please wait a moment and try again.",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // Amount in paise for Razorpay
@@ -203,7 +236,12 @@ const Main = () => {
         order_id: orderData.id,
         handler: async (response) => {
           try {
-            const verifyRes = await fetch(`${API_BASE}/verify-payment`, {
+            // Razorpay only calls this handler after the charge succeeds, so
+            // from this point on the customer HAS been charged. A failure
+            // below means our verification call had trouble — not that the
+            // payment failed — so we retry, and never tell the user to pay
+            // again.
+            const verifyRes = await fetchWithRetry(`${API_BASE}/verify-payment`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -231,18 +269,34 @@ const Main = () => {
                 isClosable: true,
                 position: "top-right",
               });
-              navigate(`/thankyou/${response.razorpay_payment_id}`);
             } else {
-              throw new Error(result.message);
+              // Verification didn't come back clean, but the charge itself
+              // succeeded (we're inside Razorpay's success handler). Let the
+              // Thank You page confirm independently — it polls the backend,
+              // which will reflect "Paid" as soon as our webhook (or a
+              // retried check) catches up.
+              toast({
+                title: "Payment received",
+                description: "Confirming your registration — this can take a few moments.",
+                status: "info",
+                duration: 6000,
+                isClosable: true,
+              });
             }
+            navigate(`/thankyou/${response.razorpay_payment_id}`);
           } catch (err) {
+            // Even a total network failure here doesn't mean the payment
+            // failed — Razorpay already confirmed it. Send the customer to
+            // the Thank You page, which independently polls for their
+            // payment, and give them the payment ID as a fallback reference.
             toast({
-              title: "Payment verification failed",
-              description: err.message || "Try again later",
-              status: "error",
-              duration: 5000,
+              title: "Payment received",
+              description: `Confirming your registration. If this doesn't complete, contact us with payment ID ${response.razorpay_payment_id}.`,
+              status: "info",
+              duration: 8000,
               isClosable: true,
             });
+            navigate(`/thankyou/${response.razorpay_payment_id}`);
           } finally {
             setIsSubmitting(false);
           }

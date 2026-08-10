@@ -15,21 +15,42 @@ export default function ThankYouPage() {
   const [candidate, setCandidate] = useState(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const verifyPayment = async () => {
-      try {
-        const res = await axios.get(`${API_BASE}/verify-payment/${id}`);
-        if (res.data.success) { setCandidate(res.data.candidate); setStatus('success'); }
-        else setStatus('invalid');
-      } catch { setStatus('error'); }
+      // Poll for a few seconds — the payment is already confirmed by Razorpay
+      // by the time this page loads; our backend just needs a moment to
+      // catch up (via the direct verify call or, as a fallback, the webhook).
+      const maxAttempts = 6;
+      const delayMs = 2500;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const res = await axios.get(`${API_BASE}/verify-payment/${id}`);
+          if (cancelled) return;
+          if (res.data.success) {
+            setCandidate(res.data.candidate);
+            setStatus('success');
+            return;
+          }
+        } catch {
+          // not found yet — keep polling until attempts run out
+        }
+        if (attempt < maxAttempts) await new Promise((r) => setTimeout(r, delayMs));
+      }
+
+      if (!cancelled) setStatus('error');
     };
+
     if (id) verifyPayment();
+    return () => { cancelled = true; };
   }, [id]);
 
   if (status === 'loading') return (
     <Center minH="100vh" bg="night.900">
       <VStack spacing={4}>
         <Spinner size="xl" color="peacock.400" thickness="3px" />
-        <Text color="whiteAlpha.600" fontSize="sm">Verifying your registration…</Text>
+        <Text color="whiteAlpha.600" fontSize="sm">Confirming your payment — this can take a few moments…</Text>
       </VStack>
     </Center>
   );
@@ -39,9 +60,22 @@ export default function ThankYouPage() {
       <Box bg="cream" borderRadius="2xl" overflow="hidden" maxW="md" w="full" boxShadow="0 30px 60px -20px rgba(12,9,33,0.8)" textAlign="center">
         <Box h="5px" bg={status === 'invalid' ? 'lotus.500' : 'saffron.500'} />
         <VStack spacing={4} px={8} py={10}>
-          <Text fontSize="3xl">{status === 'invalid' ? '⚠️' : '🔌'}</Text>
-          <Heading size="md" color="night.800">{status === 'invalid' ? 'Invalid payment' : 'Something went wrong'}</Heading>
-          <Text fontSize="sm" color="night.500">{status === 'invalid' ? "This payment ID doesn't match any registration." : 'We couldn\'t verify your payment. Please try again later.'}</Text>
+          <Text fontSize="3xl">🙏</Text>
+          <Heading size="md" color="night.800">Almost there!</Heading>
+          <Text fontSize="sm" color="night.500">
+            We're still confirming your payment on our end — this sometimes takes a few extra minutes.
+            You will receive a WhatsApp confirmation once it's done.
+          </Text>
+          <Text fontSize="xs" color="night.400" fontFamily="mono" bg="night.50" px={3} py={2} borderRadius="md">
+            Payment ID: {id}
+          </Text>
+          <Text fontSize="xs" color="night.500">
+            If you don't hear back within 15 minutes, please write to{" "}
+            <Text as="a" href="mailto:krishnapulse@gmail.com" color="peacock.600" fontWeight={600} textDecoration="underline">
+              krishnapulse@gmail.com
+            </Text>{" "}
+            with this payment ID. Please don't pay again.
+          </Text>
           <Button variant="pulse" onClick={() => navigate('/')} mt={2}>Back to home</Button>
         </VStack>
       </Box>
@@ -49,7 +83,7 @@ export default function ThankYouPage() {
   );
 
   const details = [
-    { icon: Calendar, label: 'Event date', value: 'August 15, 2025' },
+    { icon: Calendar, label: 'Event date', value: 'September 6, 2026' },
     { icon: MapPin, label: 'Venue', value: 'Gadiraju Palace, Beach Road, Visakhapatnam' },
     { icon: Phone, label: 'WhatsApp updates', value: "You'll receive event updates on WhatsApp" },
   ];
