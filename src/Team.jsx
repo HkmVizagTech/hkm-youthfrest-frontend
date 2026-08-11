@@ -10,14 +10,14 @@ import { API_HOST } from "./config";
 
 const API_URL = `${API_HOST}/admin/users`;
 
-const roleLabel = { admin: "Admin", user: "Scanner Staff" };
-const roleColor = { admin: "purple", user: "teal" };
+const roleLabel = { admin: "Admin", volunteer: "Volunteer", user: "Volunteer" };
+const roleColor = { admin: "purple", volunteer: "teal", user: "teal" };
 
 const Team = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", password: "", role: "user" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: "volunteer" });
   const toast = useToast();
 
   const authHeader = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
@@ -45,7 +45,7 @@ const Team = () => {
     try {
       await axios.post(`${API_URL}/register`, form, { headers: authHeader() });
       toast({ title: `${roleLabel[form.role]} account created`, status: "success" });
-      setForm({ name: "", email: "", password: "", role: "user" });
+      setForm({ name: "", email: "", password: "", role: "volunteer" });
       fetchUsers();
     } catch (err) {
       toast({ title: "Could not create account", description: err.response?.data?.message || err.message, status: "error" });
@@ -88,7 +88,7 @@ const Team = () => {
                 <FormControl>
                   <FormLabel fontSize="xs" fontWeight={700} color="night.600">Role</FormLabel>
                   <Select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
-                    <option value="user">Scanner Staff</option>
+                    <option value="volunteer">Volunteer</option>
                     <option value="admin">Admin</option>
                   </Select>
                 </FormControl>
@@ -108,7 +108,7 @@ const Team = () => {
           </form>
           <Text fontSize="xs" color="night.400" mt={3}>
             <Tag size="sm" colorScheme="purple" mr={1}>Admin</Tag> full access, including Team and Colleges.{" "}
-            <Tag size="sm" colorScheme="teal" mr={1}>Scanner Staff</Tag> QR scanner + scanned list only.
+            <Tag size="sm" colorScheme="teal" mr={1}>Volunteer</Tag> QR scanner + scanned list only.
           </Text>
         </Box>
 

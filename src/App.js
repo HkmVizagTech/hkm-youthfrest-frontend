@@ -32,12 +32,12 @@ function App() {
       <Route path='/' element={<Main/>}/>
   <Route path='/send' element={<SendCertificate/>}/>
       <Route path='/admin/adminqrscanner' element={
-        <ProtectedRoute allowedRoles={["user", "admin"]}>
+        <ProtectedRoute allowedRoles={["volunteer", "user", "admin"]}>
           <AdminQrScanner/>
         </ProtectedRoute>
       } />
       <Route path='/admin/AdminAttendanceScannedList' element={
-        <ProtectedRoute allowedRoles={["user", "admin"]}>
+        <ProtectedRoute allowedRoles={["volunteer", "user", "admin"]}>
           <AdminAttendanceScannedList/>
         </ProtectedRoute>
       } />

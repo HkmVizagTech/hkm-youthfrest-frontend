@@ -15,6 +15,10 @@ const NAV = {
     { to: "/admin/AdminAttendanceScannedList", label: "Scanned List", icon: "✅" },
     { to: "/admin/adminqrscanner", label: "QR Scanner", icon: "📷" },
   ],
+  volunteer: [
+    { to: "/admin/AdminAttendanceScannedList", label: "Scanned List", icon: "✅" },
+    { to: "/admin/adminqrscanner", label: "QR Scanner", icon: "📷" },
+  ],
 };
 
 const SidebarContent = ({ onClose }) => {
