@@ -9,6 +9,7 @@ const NAV = {
     { to: "/admin/AdminAttendanceScannedList", label: "Scanned List", icon: "✅" },
     { to: "/admin/adminqrscanner", label: "QR Scanner", icon: "📷" },
     { to: "/admin/college", label: "Colleges", icon: "🏫" },
+    { to: "/admin/team", label: "Team", icon: "🔐" },
   ],
   user: [
     { to: "/admin/AdminAttendanceScannedList", label: "Scanned List", icon: "✅" },

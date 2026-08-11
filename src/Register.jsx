@@ -8,6 +8,7 @@ import {
   Input,
   VStack,
   Heading,
+  Text,
   useToast,
 } from "@chakra-ui/react";
 
@@ -74,7 +75,10 @@ const Register = () => {
 
   return (
     <Box maxW="md" mx="auto" mt={10} p={6} borderWidth={1} borderRadius="lg" boxShadow="md" >
-      <Heading mb={6} textAlign="center" size="md">Admin Authentication</Heading>
+      <Heading mb={2} textAlign="center" size="md">Admin Authentication</Heading>
+      <Text fontSize="xs" color="gray.500" textAlign="center" mb={4}>
+        For first-time setup only. To add teammates afterward, use Team from the admin sidebar.
+      </Text>
       <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
           <FormControl isRequired>

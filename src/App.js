@@ -13,6 +13,7 @@ import Main from './Main';
 import theme from './theme';
 import {Routes,Route} from 'react-router-dom'
 import CollegeManager from './CollegeManager';
+import Team from './Team';
 import ThankYou from './ThankYou';
 import Attendence from './Attendence';
 import CandidateExport from './CandidateExport';
@@ -44,6 +45,11 @@ function App() {
       <Route path='/admin/college' element={
         <ProtectedRoute allowedRoles={["admin"]}>
           <CollegeManager/>
+        </ProtectedRoute>
+      }/>
+      <Route path='/admin/team' element={
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <Team/>
         </ProtectedRoute>
       }/>
       <Route path='/thankyou/:id' element={
