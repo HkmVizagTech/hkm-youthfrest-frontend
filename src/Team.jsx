@@ -10,8 +10,8 @@ import { API_HOST } from "./config";
 
 const API_URL = `${API_HOST}/admin/users`;
 
-const roleLabel = { admin: "Admin", volunteer: "Volunteer", user: "Volunteer" };
-const roleColor = { admin: "purple", volunteer: "teal", user: "teal" };
+const roleLabel = { admin: "Admin", volunteer: "Volunteer", user: "Volunteer", collegeadmin: "College Admin" };
+const roleColor = { admin: "purple", volunteer: "teal", user: "teal", collegeadmin: "orange" };
 
 const Team = () => {
   const [users, setUsers] = useState([]);
@@ -89,6 +89,7 @@ const Team = () => {
                   <FormLabel fontSize="xs" fontWeight={700} color="night.600">Role</FormLabel>
                   <Select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
                     <option value="volunteer">Volunteer</option>
+                    <option value="collegeadmin">College Admin</option>
                     <option value="admin">Admin</option>
                   </Select>
                 </FormControl>
@@ -108,6 +109,7 @@ const Team = () => {
           </form>
           <Text fontSize="xs" color="night.400" mt={3}>
             <Tag size="sm" colorScheme="purple" mr={1}>Admin</Tag> full access, including Team and Colleges.{" "}
+            <Tag size="sm" colorScheme="orange" mr={1}>College Admin</Tag> registrations + colleges only.{" "}
             <Tag size="sm" colorScheme="teal" mr={1}>Volunteer</Tag> QR scanner + scanned list only.
           </Text>
         </Box>
