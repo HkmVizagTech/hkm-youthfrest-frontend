@@ -15,9 +15,14 @@ const NAV = {
     { to: "/admin/AdminAttendanceScannedList", label: "Scanned List", icon: "✅" },
     { to: "/admin/adminqrscanner", label: "QR Scanner", icon: "📷" },
   ],
+<<<<<<< HEAD
   volunteer: [
     { to: "/admin/AdminAttendanceScannedList", label: "Scanned List", icon: "✅" },
     { to: "/admin/adminqrscanner", label: "QR Scanner", icon: "📷" },
+  ],
+  collegeadmin: [
+    { to: "/admin", label: "All Candidates", icon: "👥" },
+    { to: "/admin/college", label: "Colleges", icon: "🏫" },
   ],
 };
 

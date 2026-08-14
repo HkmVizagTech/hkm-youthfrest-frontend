@@ -25,6 +25,7 @@ import Register from './Register';
 import ProtectedRoute from './component/ProtectedRoute';
 import FestivalNotice from './component/FestivalNotice';
 import SendCertificate from './component/sendCertificate';
+import JoinRedirect from './component/JoinRedirect';
 function App() {
   return (
     <ChakraProvider theme={theme}>
@@ -43,7 +44,7 @@ function App() {
       } />
      
       <Route path='/admin/college' element={
-        <ProtectedRoute allowedRoles={["admin"]}>
+        <ProtectedRoute allowedRoles={["admin", "collegeadmin"]}>
           <CollegeManager/>
         </ProtectedRoute>
       }/>
@@ -56,8 +57,10 @@ function App() {
        <ThankYou />
       }/>
       <Route path='/attendance' element={<Attendence/>}/>
+      <Route path='/joing' element={<JoinRedirect gender='g'/>}/>
+      <Route path='/joinb' element={<JoinRedirect gender='b'/>}/>
       <Route path='/admin' element={
-        <ProtectedRoute allowedRoles={["admin"]}>
+        <ProtectedRoute allowedRoles={["admin", "collegeadmin"]}>
           <CandidateExport/>
         </ProtectedRoute>
       }/>

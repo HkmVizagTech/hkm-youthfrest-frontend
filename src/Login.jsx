@@ -24,6 +24,7 @@ const Login = () => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
         if (data.role === "admin") navigate("/admin");
+        else if (data.role === "collegeadmin") navigate("/admin");
         else if (data.role === "volunteer" || data.role === "user") navigate("/admin/AdminAttendanceScannedList");
         else navigate("/");
       } else {
