@@ -36,6 +36,7 @@ const initialState = {
   email: "",
   gender: "",
   collegeOrWorking: "",
+  accommodationType: "Day Scholar",
   companyName: "",
   college: "",
   course: "",
@@ -629,6 +630,23 @@ const Main = () => {
                     Don't see your college? Just type its name.
                   </Text>
                   <FormErrorMessage>{errors.college}</FormErrorMessage>
+                </FormControl>
+              )}
+
+              {formData.collegeOrWorking === "College" && (
+                <FormControl>
+                  <FormLabel>
+                    Are you a
+                  </FormLabel>
+                  <RadioGroup
+                    value={formData.accommodationType}
+                    onChange={(val) => handleInputChange("accommodationType", val)}
+                  >
+                    <HStack spacing={6}>
+                      <Radio value="Day Scholar" colorScheme="peacock">Day Scholar</Radio>
+                      <Radio value="Hosteler" colorScheme="peacock">Hosteler</Radio>
+                    </HStack>
+                  </RadioGroup>
                 </FormControl>
               )}
 
