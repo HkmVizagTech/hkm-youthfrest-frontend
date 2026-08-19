@@ -644,7 +644,7 @@ const Main = () => {
                   >
                     <HStack spacing={6}>
                       <Radio value="Day Scholar" colorScheme="peacock">Day Scholar</Radio>
-                      <Radio value="Hosteler" colorScheme="peacock">Hosteler</Radio>
+                      <Radio value="Hosteller" colorScheme="peacock">Hosteller</Radio>
                     </HStack>
                   </RadioGroup>
                 </FormControl>
@@ -694,12 +694,6 @@ const Main = () => {
                 Register now — just ₹49
               </Button>
 
-              <Text textAlign="center" fontSize="sm" color="night.500">
-                Questions? Write to{" "}
-                <Text as="a" href="mailto:krishnapulse@gmail.com" color="peacock.600" fontWeight={600} textDecoration="underline">
-                  krishnapulse@gmail.com
-                </Text>
-              </Text>
             </VStack>
           </Box>
         </Box>
