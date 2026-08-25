@@ -93,7 +93,8 @@ const Main = () => {
     const fetchColleges = async () => {
       try {
         const res = await axios.get(
-          `${API_HOST}/college`
+          `${API_HOST}/college`,
+          { timeout: 10000 }
         );
         const options = res.data.map((college) => ({
           label: college.name,
@@ -180,20 +181,28 @@ const Main = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Retries a fetch a few times with a short backoff — used for the
-  // post-payment verification call, where a transient network blip should
-  // not be mistaken for a failed payment (Razorpay has already charged the
-  // customer by the time this runs).
-  const fetchWithRetry = async (url, options, retries = 2, delayMs = 1500) => {
+  // Retries a fetch a few times with a short backoff, and gives up each
+  // attempt after `timeoutMs` instead of waiting indefinitely — native
+  // fetch() has no timeout of its own, so a stalled connection would
+  // otherwise leave the student staring at a spinner with no feedback.
+  const fetchWithRetry = async (url, options, { retries = 2, delayMs = 1500, timeoutMs = 12000 } = {}) => {
+    let lastErr;
     for (let attempt = 0; attempt <= retries; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
-        const res = await fetch(url, options);
+        const res = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timer);
         if (res.ok || attempt === retries) return res;
+        lastErr = new Error(`Request failed with status ${res.status}`);
       } catch (err) {
-        if (attempt === retries) throw err;
+        clearTimeout(timer);
+        lastErr = err.name === "AbortError" ? new Error("Request timed out") : err;
+        if (attempt === retries) throw lastErr;
       }
       await new Promise((r) => setTimeout(r, delayMs));
     }
+    throw lastErr;
   };
 
   const handlePayment = async () => {
@@ -220,13 +229,16 @@ const Main = () => {
       // Amount in paise for Razorpay
       const amountInPaise = 49 * 100;
 
-      const orderRes = await fetch(`${API_BASE}/create-order`, {
+      // No money has moved yet at this point, so it's safe to retry this
+      // call on a network blip or slow response — the student just waits a
+      // little longer instead of seeing a confusing failure.
+      const orderRes = await fetchWithRetry(`${API_BASE}/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: amountInPaise, formData: finalFormData }),
-      });
+      }, { retries: 2, delayMs: 1200, timeoutMs: 12000 });
       const orderData = await orderRes.json();
-      if (!orderData.id) throw new Error("Order creation failed");
+      if (!orderData.id) throw new Error(orderData.message || "Order creation failed");
 
       const options = {
         key: RAZORPAY_KEY,
@@ -255,7 +267,7 @@ const Main = () => {
                   receipt: `receipt_${Date.now()}`,
                 },
               }),
-            });
+            }, { retries: 3, delayMs: 1500, timeoutMs: 15000 });
             const result = await verifyRes.json();
 
             if (

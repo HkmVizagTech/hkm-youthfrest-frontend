@@ -26,7 +26,7 @@ export default function ThankYouPage() {
 
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-          const res = await axios.get(`${API_BASE}/verify-payment/${id}`);
+          const res = await axios.get(`${API_BASE}/verify-payment/${id}`, { timeout: 10000 });
           if (cancelled) return;
           if (res.data.success) {
             setCandidate(res.data.candidate);
