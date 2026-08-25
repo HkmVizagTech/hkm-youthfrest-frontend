@@ -20,7 +20,7 @@ const CandidateExport = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${API_HOST}/users`)
+    fetch(`${API_HOST}/users?limit=all`)
       .then(r => r.json()).then(d => { setData(d.candidates || []); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
