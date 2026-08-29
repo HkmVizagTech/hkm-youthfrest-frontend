@@ -24,13 +24,26 @@ const Team = () => {
 
   const fetchUsers = async () => {
     setLoading(true);
-    try {
-      const res = await axios.get(`${API_URL}/`, { headers: authHeader() });
-      setUsers(res.data.users || []);
-    } catch (err) {
-      toast({ title: "Failed to load team", description: err.response?.data?.message || err.message, status: "error" });
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const res = await axios.get(`${API_URL}/`, { headers: authHeader(), timeout: 10000 });
+        setUsers(res.data.users || []);
+        setLoading(false);
+        return;
+      } catch (err) {
+        const status = err.response?.status;
+        // Auth/permission failures won't fix themselves on retry — surface
+        // them right away instead of making the admin wait through retries.
+        const isAuthFailure = status === 401 || status === 403;
+        if (isAuthFailure || attempt === maxAttempts) {
+          toast({ title: "Failed to load team", description: err.response?.data?.message || err.message, status: "error" });
+          setLoading(false);
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 1200));
+      }
     }
-    setLoading(false);
   };
 
   useEffect(() => { fetchUsers(); }, []);

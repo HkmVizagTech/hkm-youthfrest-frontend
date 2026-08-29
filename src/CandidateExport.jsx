@@ -16,6 +16,12 @@ const CandidateExport = () => {
   const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(true);
   const [filteredPaymentStatus, setFilteredPaymentStatus] = useState("");
+  const [filteredGender, setFilteredGender] = useState("");
+  const [filteredSlot, setFilteredSlot] = useState("");
+  const [filteredType, setFilteredType] = useState(""); // College / Working
+  const [filteredAttendance, setFilteredAttendance] = useState("");
+  const [filteredYear, setFilteredYear] = useState("");
+  const [filteredPaymentMethod, setFilteredPaymentMethod] = useState("");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
@@ -36,11 +42,33 @@ const CandidateExport = () => {
   const filteredData = data.filter(c => {
     const collegeMatch = filteredCollege ? c.college === filteredCollege : true;
     const paymentMatch = filteredPaymentStatus ? c.paymentStatus === filteredPaymentStatus : true;
+    const genderMatch = filteredGender ? c.gender === filteredGender : true;
+    const slotMatch = filteredSlot ? c.slot === filteredSlot : true;
+    const typeMatch = filteredType ? c.collegeOrWorking === filteredType : true;
+    const attendanceMatch = filteredAttendance
+      ? (filteredAttendance === "Present" ? !!c.attendance : !c.attendance)
+      : true;
+    const yearMatch = filteredYear ? String(c.year) === filteredYear : true;
+    const paymentMethodMatch = filteredPaymentMethod ? c.paymentMethod === filteredPaymentMethod : true;
     const searchMatch = search.length < 2 || [c.name, c.email, c.whatsappNumber, c.college, c.companyName].join(" ").toLowerCase().includes(search.toLowerCase());
-    return collegeMatch && filterByDate(c) && paymentMatch && searchMatch;
+    return collegeMatch && filterByDate(c) && paymentMatch && genderMatch && slotMatch
+      && typeMatch && attendanceMatch && yearMatch && paymentMethodMatch && searchMatch;
   });
 
   const uniqueColleges = [...new Set(data.map(c => c.college).filter(Boolean))];
+  const uniqueSlots = [...new Set(data.map(c => c.slot).filter(Boolean))];
+  const uniqueYears = [...new Set(data.map(c => c.year).filter(Boolean))].sort();
+  const uniquePaymentMethods = [...new Set(data.map(c => c.paymentMethod).filter(Boolean))];
+
+  const hasActiveFilters = filteredCollege || startDate || endDate || filteredPaymentStatus
+    || filteredGender || filteredSlot || filteredType || filteredAttendance || filteredYear
+    || filteredPaymentMethod || search;
+
+  const clearFilters = () => {
+    setFilteredCollege(""); setStartDate(""); setEndDate(""); setFilteredPaymentStatus("");
+    setFilteredGender(""); setFilteredSlot(""); setFilteredType(""); setFilteredAttendance("");
+    setFilteredYear(""); setFilteredPaymentMethod(""); setSearch("");
+  };
 
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(filteredData.map(r => ({
@@ -84,16 +112,52 @@ const CandidateExport = () => {
         </HStack>
 
         {/* filters */}
-        <Box mb={4} p={4} bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)" overflowX="auto">
-          <Flex gap={3} align="flex-end" wrap="nowrap" minW="640px">
-            <FormControl w="170px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">College</FormLabel>
+        <Box mb={4} p={4} bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)">
+          <Flex justify="space-between" align="center" mb={3}>
+            <Text fontSize="xs" fontWeight={700} color="night.500" textTransform="uppercase" letterSpacing="0.08em">Filters</Text>
+            {hasActiveFilters && (
+              <Button size="xs" variant="ghost" colorScheme="red" onClick={clearFilters}>Clear all</Button>
+            )}
+          </Flex>
+          <Flex gap={3} wrap="wrap" align="flex-end">
+            <FormControl w="160px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">College</FormLabel>
               <Select placeholder="All colleges" size="sm" value={filteredCollege} onChange={e => setFilteredCollege(e.target.value)}>
                 {uniqueColleges.map((c, i) => <option key={i} value={c}>{c}</option>)}
               </Select>
             </FormControl>
-            <FormControl w="140px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">Payment</FormLabel>
+            <FormControl w="130px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">Payment</FormLabel>
               <Select placeholder="All" size="sm" value={filteredPaymentStatus} onChange={e => setFilteredPaymentStatus(e.target.value)}>
                 <option value="Paid">Paid</option><option value="Pending">Pending</option><option value="Failed">Failed</option>
+              </Select>
+            </FormControl>
+            <FormControl w="130px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">Payment method</FormLabel>
+              <Select placeholder="All" size="sm" value={filteredPaymentMethod} onChange={e => setFilteredPaymentMethod(e.target.value)}>
+                {uniquePaymentMethods.map((m, i) => <option key={i} value={m}>{m}</option>)}
+              </Select>
+            </FormControl>
+            <FormControl w="120px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">Gender</FormLabel>
+              <Select placeholder="All" size="sm" value={filteredGender} onChange={e => setFilteredGender(e.target.value)}>
+                <option value="Male">Male</option><option value="Female">Female</option>
+              </Select>
+            </FormControl>
+            <FormControl w="120px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">Slot</FormLabel>
+              <Select placeholder="All" size="sm" value={filteredSlot} onChange={e => setFilteredSlot(e.target.value)}>
+                {uniqueSlots.map((s, i) => <option key={i} value={s}>{s}</option>)}
+              </Select>
+            </FormControl>
+            <FormControl w="130px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">College / Working</FormLabel>
+              <Select placeholder="All" size="sm" value={filteredType} onChange={e => setFilteredType(e.target.value)}>
+                <option value="College">College</option><option value="Working">Working</option>
+              </Select>
+            </FormControl>
+            <FormControl w="110px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">Year</FormLabel>
+              <Select placeholder="All" size="sm" value={filteredYear} onChange={e => setFilteredYear(e.target.value)}>
+                {uniqueYears.map((y, i) => <option key={i} value={y}>{y}</option>)}
+              </Select>
+            </FormControl>
+            <FormControl w="130px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">Attendance</FormLabel>
+              <Select placeholder="All" size="sm" value={filteredAttendance} onChange={e => setFilteredAttendance(e.target.value)}>
+                <option value="Present">Present</option><option value="Absent">Not present</option>
               </Select>
             </FormControl>
             <FormControl w="140px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">From</FormLabel>
@@ -102,7 +166,7 @@ const CandidateExport = () => {
             <FormControl w="140px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">To</FormLabel>
               <Input type="date" size="sm" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </FormControl>
-            <FormControl flex={1}><FormLabel fontSize="xs" fontWeight={700} color="night.600">Search</FormLabel>
+            <FormControl minW="200px" flex={1}><FormLabel fontSize="xs" fontWeight={700} color="night.600">Search</FormLabel>
               <Input placeholder="Name, phone, college…" size="sm" value={search} onChange={e => setSearch(e.target.value)} />
             </FormControl>
             <Button colorScheme="teal" leftIcon={<DownloadIcon />} onClick={exportToExcel} size="sm" minW="130px" flexShrink={0}>
