@@ -574,7 +574,19 @@ const Main = () => {
                   <InputLeftAddon bg="saffron.50" borderColor="blackAlpha.200" color="saffron.700" fontWeight={700}>
                     +91
                   </InputLeftAddon>
-                  <Input type="tel" placeholder="Your WhatsApp number" value={formData.whatsappNumber} onChange={(e) => handleInputChange("whatsappNumber", e.target.value)} />
+                  <Input
+                    type="tel"
+                    placeholder="Your WhatsApp number"
+                    value={formData.whatsappNumber}
+                    onChange={(e) => {
+                      // Strip anything that isn't a digit (spaces, dashes,
+                      // etc.) as it's typed, so what's stored and submitted
+                      // is always exactly 10 clean digits — never a
+                      // formatted string that later fails to match.
+                      const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 10);
+                      handleInputChange("whatsappNumber", digitsOnly);
+                    }}
+                  />
                 </InputGroup>
                 <FormErrorMessage>{errors.whatsappNumber}</FormErrorMessage>
               </FormControl>

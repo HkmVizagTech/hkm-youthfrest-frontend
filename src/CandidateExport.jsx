@@ -1,7 +1,13 @@
 import { API_HOST } from "./config";
 import React, { useEffect, useState } from "react";
-import { Box, Heading, Select, Table, Thead, Tbody, Tr, Th, Td, Button, Spinner, Input, Flex, FormControl, FormLabel, Tag, Tooltip, Text, HStack, Badge, chakra } from "@chakra-ui/react";
-import { CheckCircleIcon, WarningIcon, DownloadIcon, PhoneIcon, TimeIcon } from "@chakra-ui/icons";
+import {
+  Box, Heading, Select, Table, Thead, Tbody, Tr, Th, Td, Button, Spinner, Input, Flex,
+  FormControl, FormLabel, Tag, Tooltip, Text, HStack, Badge, chakra, IconButton,
+  Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter,
+  useDisclosure, useToast, FormErrorMessage,
+} from "@chakra-ui/react";
+import { CheckCircleIcon, WarningIcon, DownloadIcon, PhoneIcon, TimeIcon, EditIcon } from "@chakra-ui/icons";
+import axios from "axios";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +30,47 @@ const CandidateExport = () => {
   const [filteredPaymentMethod, setFilteredPaymentMethod] = useState("");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [editTarget, setEditTarget] = useState(null); // candidate being edited
+  const [editForm, setEditForm] = useState({ name: "", whatsappNumber: "", email: "" });
+  const [editError, setEditError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const openEdit = (candidate) => {
+    setEditTarget(candidate);
+    setEditForm({
+      name: candidate.name || "",
+      // Show without the country code for editing; re-added on save.
+      whatsappNumber: (candidate.whatsappNumber || "").replace(/^91/, ""),
+      email: candidate.email || "",
+    });
+    setEditError("");
+    onOpen();
+  };
+
+  const authHeader = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
+
+  const saveEdit = async () => {
+    const digitsOnly = editForm.whatsappNumber.replace(/\D/g, "");
+    if (!editForm.name.trim()) { setEditError("Name is required"); return; }
+    if (!/^\d{10}$/.test(digitsOnly)) { setEditError("Enter a valid 10-digit WhatsApp number"); return; }
+    setSaving(true);
+    setEditError("");
+    try {
+      const res = await axios.put(
+        `${API_HOST}/users/${editTarget._id}`,
+        { name: editForm.name.trim(), whatsappNumber: digitsOnly, email: editForm.email.trim() },
+        { headers: authHeader(), timeout: 10000 }
+      );
+      setData((prev) => prev.map((c) => (c._id === editTarget._id ? res.data.candidate : c)));
+      toast({ title: "Candidate updated", status: "success" });
+      onClose();
+    } catch (err) {
+      setEditError(err.response?.data?.message || err.message);
+    }
+    setSaving(false);
+  };
 
   useEffect(() => {
     fetch(`${API_HOST}/users?limit=all`)
@@ -179,7 +226,7 @@ const CandidateExport = () => {
         <Box overflowX="auto" bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)">
           <Table variant="simple" size="sm">
             <Thead><Tr bg="night.50">
-              {["#","Name","Gender","Phone","College / Company","Course","Year","Reg Date","Slot","Payment","Method","Present"].map(h => (
+              {["#","Name","Gender","Phone","College / Company","Course","Year","Reg Date","Slot","Payment","Method","Present",""].map(h => (
                 <Th key={h} fontSize="xs" color="night.500" fontWeight={700} whiteSpace="nowrap">{h}</Th>
               ))}
             </Tr></Thead>
@@ -198,13 +245,48 @@ const CandidateExport = () => {
                   <Td><Tag size="sm" colorScheme={statusColor[c.paymentStatus] || "gray"}>{c.paymentStatus}</Tag></Td>
                   <Td><Tag size="sm" colorScheme="orange">{c.paymentMethod || "—"}</Tag></Td>
                   <Td>{c.attendance ? <CheckCircleIcon color="green.400" /> : <WarningIcon color="gray.300" />}</Td>
+                  <Td><IconButton aria-label="Edit candidate" icon={<EditIcon />} size="xs" variant="ghost" colorScheme="gray" onClick={() => openEdit(c)} /></Td>
                 </Tr>
               ))}
-              {filteredData.length === 0 && <Tr><Td colSpan={12}><Text color="night.300" textAlign="center" py={10} fontSize="sm">No candidates found.</Text></Td></Tr>}
+              {filteredData.length === 0 && <Tr><Td colSpan={13}><Text color="night.300" textAlign="center" py={10} fontSize="sm">No candidates found.</Text></Td></Tr>}
             </Tbody>
           </Table>
         </Box>
       </Box>
+
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <ModalOverlay />
+        <ModalContent mx={4}>
+          <ModalHeader>Edit candidate</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl mb={3}>
+              <FormLabel fontSize="xs" fontWeight={700} color="night.600">Name</FormLabel>
+              <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+            </FormControl>
+            <FormControl mb={3} isInvalid={!!editError}>
+              <FormLabel fontSize="xs" fontWeight={700} color="night.600">WhatsApp Number</FormLabel>
+              <HStack>
+                <Text fontSize="sm" color="night.500" fontWeight={700}>+91</Text>
+                <Input
+                  value={editForm.whatsappNumber}
+                  onChange={(e) => setEditForm({ ...editForm, whatsappNumber: e.target.value.replace(/\D/g, "").slice(0, 10) })}
+                  placeholder="10-digit number"
+                />
+              </HStack>
+              <FormErrorMessage>{editError}</FormErrorMessage>
+            </FormControl>
+            <FormControl>
+              <FormLabel fontSize="xs" fontWeight={700} color="night.600">Email</FormLabel>
+              <Input value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+            </FormControl>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={onClose}>Cancel</Button>
+            <Button colorScheme="teal" onClick={saveEdit} isLoading={saving}>Save</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Layout>
   );
 };
