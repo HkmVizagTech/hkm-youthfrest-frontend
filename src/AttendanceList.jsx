@@ -66,20 +66,20 @@ const AttendanceList = () => {
           </HStack>
         </Flex>
 
-        <Box mb={4} p={4} bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)" overflowX="auto">
-          <Flex gap={3} align="flex-end" wrap="nowrap" minW="580px">
-            <FormControl w="170px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">College</FormLabel>
+        <Box mb={4} p={4} bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)">
+          <Flex gap={3} align="flex-end" wrap="wrap">
+            <FormControl w={{ base: "calc(50% - 6px)", sm: "170px" }}><FormLabel fontSize="xs" fontWeight={700} color="night.600">College</FormLabel>
               <Select placeholder="All colleges" size="sm" value={filteredCollege} onChange={e => setFilteredCollege(e.target.value)}>
                 {uniqueColleges.map((c, i) => <option key={i} value={c}>{c}</option>)}
               </Select>
             </FormControl>
-            <FormControl w="140px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">From</FormLabel>
+            <FormControl w={{ base: "calc(50% - 6px)", sm: "140px" }}><FormLabel fontSize="xs" fontWeight={700} color="night.600">From</FormLabel>
               <Input type="date" size="sm" value={startDate} onChange={e => setStartDate(e.target.value)} />
             </FormControl>
-            <FormControl w="140px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">To</FormLabel>
+            <FormControl w={{ base: "calc(50% - 6px)", sm: "140px" }}><FormLabel fontSize="xs" fontWeight={700} color="night.600">To</FormLabel>
               <Input type="date" size="sm" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </FormControl>
-            <FormControl flex={1}><FormLabel fontSize="xs" fontWeight={700} color="night.600">Search</FormLabel>
+            <FormControl minW={{ base: "100%", sm: "200px" }} flex={1}><FormLabel fontSize="xs" fontWeight={700} color="night.600">Search</FormLabel>
               <Input placeholder="Name, phone, college…" size="sm" value={search} onChange={e => setSearch(e.target.value)} />
             </FormControl>
           </Flex>

@@ -107,9 +107,6 @@ const Sidebar = () => {
           </DrawerBody>
         </DrawerContent>
       </Drawer>
-
-      {/* mobile spacer */}
-      <Box display={{ base: "block", md: "none" }} h="52px" w="100%" />
     </>
   );
 };

@@ -72,25 +72,25 @@ const AdminAttendanceScannedList = () => {
           </HStack>
         </Flex>
 
-        <Box mb={4} p={4} bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)" overflowX="auto">
-          <Flex gap={3} align="flex-end" wrap="nowrap" minW="700px">
-            <FormControl w="160px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">College</FormLabel>
+        <Box mb={4} p={4} bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)">
+          <Flex gap={3} align="flex-end" wrap="wrap">
+            <FormControl w={{ base: "calc(50% - 6px)", sm: "160px" }}><FormLabel fontSize="xs" fontWeight={700} color="night.600">College</FormLabel>
               <Select placeholder="All colleges" size="sm" value={filteredCollege} onChange={e => setFilteredCollege(e.target.value)}>
                 {uniqueColleges.map((c, i) => <option key={i} value={c}>{c}</option>)}
               </Select>
             </FormControl>
-            <FormControl w="130px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">From</FormLabel>
+            <FormControl w={{ base: "calc(50% - 6px)", sm: "130px" }}><FormLabel fontSize="xs" fontWeight={700} color="night.600">From</FormLabel>
               <Input type="date" size="sm" value={startDate} onChange={e => setStartDate(e.target.value)} />
             </FormControl>
-            <FormControl w="130px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">To</FormLabel>
+            <FormControl w={{ base: "calc(50% - 6px)", sm: "130px" }}><FormLabel fontSize="xs" fontWeight={700} color="night.600">To</FormLabel>
               <Input type="date" size="sm" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </FormControl>
-            <FormControl w="130px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">Time</FormLabel>
+            <FormControl w={{ base: "calc(50% - 6px)", sm: "130px" }}><FormLabel fontSize="xs" fontWeight={700} color="night.600">Time</FormLabel>
               <Select placeholder="All" size="sm" value={timeFilter} onChange={e => setTimeFilter(e.target.value)}>
                 <option value="morning">Morning</option><option value="evening">Evening</option>
               </Select>
             </FormControl>
-            <FormControl flex={1}><FormLabel fontSize="xs" fontWeight={700} color="night.600">Search</FormLabel>
+            <FormControl minW={{ base: "100%", sm: "200px" }} flex={1}><FormLabel fontSize="xs" fontWeight={700} color="night.600">Search</FormLabel>
               <Input placeholder="Name, phone, college…" size="sm" value={search} onChange={e => setSearch(e.target.value)} />
             </FormControl>
           </Flex>
