@@ -44,7 +44,7 @@ const AdminQrScanner = () => {
   return (
     <Layout>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px", maxWidth: 480, margin: "0 auto" }}>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#0FB6A6", marginBottom: 8 }}>Admin · QR Scanner</p>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#0FB6A6", marginBottom: 8 }}>Reception · QR Scanner</p>
         <h2 style={{ fontSize: 24, fontWeight: 800, color: "#1C1440", marginBottom: 24 }}>Scan QR Code</h2>
 
         {/* camera viewport */}

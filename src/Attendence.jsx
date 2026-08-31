@@ -89,7 +89,7 @@ const Attendence = () => {
                     <QRCodeSVG value={attendanceToken} size={180} />
                   </Box>
                 </Flex>
-                <Text fontSize="sm" color="night.500" mt={4}>🙏 Hare Krishna! Please visit the admin counter.</Text>
+                <Text fontSize="sm" color="night.500" mt={4}>🙏 Hare Krishna! Please visit the reception / help desk.</Text>
               </Box>
             )}
           </Box>
