@@ -20,8 +20,6 @@ const HelpDesk = () => {
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [busy, setBusy] = useState(null);
-  const [backfilling, setBackfilling] = useState(false);
-  const [backfillResult, setBackfillResult] = useState(null);
   const toast = useToast();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -94,53 +92,15 @@ const HelpDesk = () => {
     });
   };
 
-  const runBackfill = async () => {
-    setBackfilling(true);
-    setBackfillResult(null);
-    try {
-      const res = await axios.post(
-        `${API_HOST}/users/admin/backfill-rrn`,
-        {},
-        { headers: authHeader(), timeout: 120000 }
-      );
-      setBackfillResult(res.data);
-      toast({ title: "Backfill complete", status: "success" });
-    } catch (err) {
-      toast({ title: err.response?.data?.message || err.message || "Backfill failed", status: "error" });
-    }
-    setBackfilling(false);
-  };
-
   const getPresent = (c) => !!c.attendance || !!c.adminAttendance;
 
   return (
     <Layout>
       <Box py={4} maxW="100%">
         <Box mb={5}>
-          <Flex justify="space-between" align="flex-start" wrap="wrap" gap={3}>
-            <Box>
-              <Text fontSize="xs" fontWeight={700} color="night.400" textTransform="uppercase" letterSpacing="0.12em">Admin</Text>
-              <Heading size="lg" color="night.800" fontWeight={800}>Help Desk</Heading>
-              <Text fontSize="sm" color="night.500" mt={1}>Search by RRN or phone to find and fix registrations (wrong numbers, QR, attendance).</Text>
-            </Box>
-            <Button
-              size="sm"
-              colorScheme="purple"
-              variant="outline"
-              isLoading={backfilling}
-              onClick={runBackfill}
-              loadingText="Backfilling..."
-            >
-              Backfill RRN for existing payments
-            </Button>
-          </Flex>
-          {backfillResult && (
-            <Box mt={3} p={3} bg="green.50" borderRadius="lg" border="1px solid" borderColor="green.200">
-              <Text fontSize="sm" color="green.800" fontWeight={700}>
-                Found {backfillResult.summary?.found || 0} → updated {backfillResult.summary?.updated || 0}, skipped {backfillResult.summary?.skipped || 0}
-              </Text>
-            </Box>
-          )}
+          <Text fontSize="xs" fontWeight={700} color="night.400" textTransform="uppercase" letterSpacing="0.12em">Admin</Text>
+          <Heading size="lg" color="night.800" fontWeight={800}>Help Desk</Heading>
+          <Text fontSize="sm" color="night.500" mt={1}>Search by RRN or phone to find and fix registrations (wrong numbers, QR, attendance).</Text>
         </Box>
 
         {/* search */}
