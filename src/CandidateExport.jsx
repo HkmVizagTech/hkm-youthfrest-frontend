@@ -97,7 +97,7 @@ const CandidateExport = () => {
       : true;
     const yearMatch = filteredYear ? String(c.year) === filteredYear : true;
     const paymentMethodMatch = filteredPaymentMethod ? c.paymentMethod === filteredPaymentMethod : true;
-    const searchMatch = search.length < 2 || [c.name, c.email, c.whatsappNumber, c.college, c.companyName].join(" ").toLowerCase().includes(search.toLowerCase());
+    const searchMatch = search.length < 2 || [c.name, c.email, c.whatsappNumber, c.college, c.companyName, c.rrn].join(" ").toLowerCase().includes(search.toLowerCase());
     return collegeMatch && filterByDate(c) && paymentMatch && genderMatch && slotMatch
       && typeMatch && attendanceMatch && yearMatch && paymentMethodMatch && searchMatch;
   });
@@ -124,7 +124,7 @@ const CandidateExport = () => {
       "College/Working": r.collegeOrWorking, Year: r.year, Phone: r.whatsappNumber,
       Slot: r.slot, "Order ID": r.orderId, "Payment Amount": r.paymentAmount,
       "Payment Date": r.paymentDate ? new Date(r.paymentDate).toLocaleString() : "",
-      "Payment Status": r.paymentStatus, "Payment Method": r.paymentMethod,
+      "Payment Status": r.paymentStatus, "Payment Method": r.paymentMethod, "RRN": r.rrn || "",
       "Registration Date": r.registrationDate ? new Date(r.registrationDate).toLocaleString() : "",
       Attendance: r.attendance ? "Yes" : "No", "Receipt No": r.receipt,
       "UTM Source": r.utmSource || "", "UTM Medium": r.utmMedium || "", "UTM Campaign": r.utmCampaign || "",
@@ -214,7 +214,7 @@ const CandidateExport = () => {
               <Input type="date" size="sm" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </FormControl>
             <FormControl minW="200px" flex={1}><FormLabel fontSize="xs" fontWeight={700} color="night.600">Search</FormLabel>
-              <Input placeholder="Name, phone, college…" size="sm" value={search} onChange={e => setSearch(e.target.value)} />
+              <Input placeholder="Name, phone, RRN, college…" size="sm" value={search} onChange={e => setSearch(e.target.value)} />
             </FormControl>
             <Button colorScheme="teal" leftIcon={<DownloadIcon />} onClick={exportToExcel} size="sm" minW="130px" flexShrink={0}>
               Export Excel
@@ -226,7 +226,7 @@ const CandidateExport = () => {
         <Box overflowX="auto" bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)">
           <Table variant="simple" size="sm">
             <Thead><Tr bg="night.50">
-              {["#","Name","Gender","Phone","College / Company","Course","Year","Reg Date","Slot","Payment","Method","Present",""].map(h => (
+              {["#","Name","Gender","Phone","College / Company","Course","Year","Reg Date","Slot","Payment","Method","RRN","Present",""].map(h => (
                 <Th key={h} fontSize="xs" color="night.500" fontWeight={700} whiteSpace="nowrap">{h}</Th>
               ))}
             </Tr></Thead>
@@ -244,11 +244,12 @@ const CandidateExport = () => {
                   <Td><Tag size="sm" colorScheme="purple">{c.slot}</Tag></Td>
                   <Td><Tag size="sm" colorScheme={statusColor[c.paymentStatus] || "gray"}>{c.paymentStatus}</Tag></Td>
                   <Td><Tag size="sm" colorScheme="orange">{c.paymentMethod || "—"}</Tag></Td>
+                  <Td fontSize="xs" whiteSpace="nowrap">{c.rrn || "—"}</Td>
                   <Td>{c.attendance ? <CheckCircleIcon color="green.400" /> : <WarningIcon color="gray.300" />}</Td>
                   <Td><IconButton aria-label="Edit candidate" icon={<EditIcon />} size="xs" variant="ghost" colorScheme="gray" onClick={() => openEdit(c)} /></Td>
                 </Tr>
               ))}
-              {filteredData.length === 0 && <Tr><Td colSpan={13}><Text color="night.300" textAlign="center" py={10} fontSize="sm">No candidates found.</Text></Td></Tr>}
+              {filteredData.length === 0 && <Tr><Td colSpan={14}><Text color="night.300" textAlign="center" py={10} fontSize="sm">No candidates found.</Text></Td></Tr>}
             </Tbody>
           </Table>
         </Box>

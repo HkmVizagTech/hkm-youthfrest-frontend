@@ -32,7 +32,7 @@ const AdminAttendanceScannedList = () => {
 
   const filteredData = data.filter(c => {
     const collegeMatch = filteredCollege ? c.college === filteredCollege : true;
-    const searchMatch = search.length < 2 || [c.name, c.email, c.phone, c.college, c.branch].map(v => v || "").join(" ").toLowerCase().includes(search.toLowerCase());
+    const searchMatch = search.length < 2 || [c.name, c.email, c.phone, c.whatsappNumber, c.college, c.branch, c.rrn].map(v => v || "").join(" ").toLowerCase().includes(search.toLowerCase());
     const timeMatch = (() => {
       if (!timeFilter || !c.adminAttendanceDate) return true;
       const h = new Date(c.adminAttendanceDate).getHours();
@@ -48,7 +48,7 @@ const AdminAttendanceScannedList = () => {
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(filteredData.map((r, i) => ({
       "S.No": i + 1, Name: r.name, Email: r.email, Phone: r.phone, Gender: r.gender,
-      College: r.college, Branch: r.branch,
+      College: r.college, Branch: r.branch, "RRN": r.rrn || "",
       "Scanned At": r.adminAttendanceDate ? new Date(r.adminAttendanceDate).toLocaleString() : "",
     })));
     const wb = XLSX.utils.book_new();
@@ -91,7 +91,7 @@ const AdminAttendanceScannedList = () => {
               </Select>
             </FormControl>
             <FormControl minW={{ base: "100%", sm: "200px" }} flex={1}><FormLabel fontSize="xs" fontWeight={700} color="night.600">Search</FormLabel>
-              <Input placeholder="Name, phone, college…" size="sm" value={search} onChange={e => setSearch(e.target.value)} />
+              <Input placeholder="Name, phone, RRN, college…" size="sm" value={search} onChange={e => setSearch(e.target.value)} />
             </FormControl>
           </Flex>
         </Box>
@@ -99,7 +99,7 @@ const AdminAttendanceScannedList = () => {
         <Box overflowX="auto" bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)">
           <Table variant="simple" size="sm">
             <Thead><Tr bg="night.50">
-              {["#","Name","Email","Gender","Phone","College","Branch","Scanned at","Status"].map(h => (
+              {              ["#","Name","Email","Gender","Phone","College","Branch","RRN","Scanned at","Status"].map(h => (
                 <Th key={h} fontSize="xs" color="night.500" fontWeight={700} whiteSpace="nowrap">{h}</Th>
               ))}
             </Tr></Thead>
@@ -113,11 +113,12 @@ const AdminAttendanceScannedList = () => {
                   <Td><HStack spacing={1}><PhoneIcon boxSize={3} color="peacock.500" /><Text fontSize="sm">{c.phone}</Text></HStack></Td>
                   <Td fontSize="sm">{c.college || "—"}</Td>
                   <Td fontSize="sm">{c.branch || "—"}</Td>
+                  <Td fontSize="xs" whiteSpace="nowrap">{c.rrn || "—"}</Td>
                   <Td fontSize="xs" color="night.400" whiteSpace="nowrap">{c.adminAttendanceDate ? new Date(c.adminAttendanceDate).toLocaleString() : "—"}</Td>
                   <Td><Tag colorScheme="green" size="sm"><CheckCircleIcon mr={1} />Scanned</Tag></Td>
                 </Tr>
               ))}
-              {filteredData.length === 0 && <Tr><Td colSpan={9}><Text color="night.300" textAlign="center" py={10} fontSize="sm">No scanned records found.</Text></Td></Tr>}
+              {filteredData.length === 0 && <Tr><Td colSpan={10}><Text color="night.300" textAlign="center" py={10} fontSize="sm">No scanned records found.</Text></Td></Tr>}
             </Tbody>
           </Table>
         </Box>

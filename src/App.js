@@ -20,6 +20,7 @@ import CandidateExport from './CandidateExport';
 import AttendanceList from './AttendanceList';
 import AdminQrScanner from './AdminQrScanner';
 import AdminAttendanceScannedList from './AdminAttendanceScannedList';
+import HelpDesk from './HelpDesk';
 import Login from './Login';
 import Register from './Register';
 import ProtectedRoute from './component/ProtectedRoute';
@@ -51,6 +52,11 @@ function App() {
       <Route path='/admin/team' element={
         <ProtectedRoute allowedRoles={["admin"]}>
           <Team/>
+        </ProtectedRoute>
+      }/>
+      <Route path='/admin/helpdesk' element={
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <HelpDesk/>
         </ProtectedRoute>
       }/>
       <Route path='/thankyou/:id' element={

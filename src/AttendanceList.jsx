@@ -31,7 +31,7 @@ const AttendanceList = () => {
 
   const filteredData = data.filter(c => {
     const collegeMatch = filteredCollege ? c.college === filteredCollege : true;
-    const searchMatch = search.length < 2 || [c.name, c.email, c.whatsappNumber, c.college, c.branch].join(' ').toLowerCase().includes(search.toLowerCase());
+    const searchMatch = search.length < 2 || [c.name, c.email, c.whatsappNumber, c.college, c.branch, c.rrn].join(' ').toLowerCase().includes(search.toLowerCase());
     return collegeMatch && filterByDate(c) && searchMatch;
   });
 
@@ -40,7 +40,7 @@ const AttendanceList = () => {
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(filteredData.map((r, i) => ({
       'S.No': i + 1, Name: r.name, Gender: r.gender, Email: r.email, College: r.college,
-      Branch: r.branch, Phone: r.whatsappNumber, Slot: r.slot,
+      Branch: r.branch, Phone: r.whatsappNumber, RRN: r.rrn || "", Slot: r.slot,
       Attendance: r.attendance ? 'Yes' : 'No',
       'Attendance Date': r.attendanceDate ? new Date(r.attendanceDate).toLocaleString() : '',
       'Registration Date': r.registrationDate ? new Date(r.registrationDate).toLocaleString() : '',
@@ -80,7 +80,7 @@ const AttendanceList = () => {
               <Input type="date" size="sm" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </FormControl>
             <FormControl minW={{ base: "100%", sm: "200px" }} flex={1}><FormLabel fontSize="xs" fontWeight={700} color="night.600">Search</FormLabel>
-              <Input placeholder="Name, phone, college…" size="sm" value={search} onChange={e => setSearch(e.target.value)} />
+              <Input placeholder="Name, phone, RRN, college…" size="sm" value={search} onChange={e => setSearch(e.target.value)} />
             </FormControl>
           </Flex>
         </Box>
@@ -88,7 +88,7 @@ const AttendanceList = () => {
         <Box overflowX="auto" bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)">
           <Table variant="simple" size="sm">
             <Thead><Tr bg="night.50">
-              {["#","Name","Gender","Phone","College","Branch","Email","Present","Slot","Attended","Registered"].map(h => (
+              {["#","Name","Gender","Phone","College","Branch","RRN","Email","Present","Slot","Attended","Registered"].map(h => (
                 <Th key={h} fontSize="xs" color="night.500" fontWeight={700} whiteSpace="nowrap">{h}</Th>
               ))}
             </Tr></Thead>
@@ -101,6 +101,7 @@ const AttendanceList = () => {
                   <Td><HStack spacing={1}><PhoneIcon boxSize={3} color="peacock.500" /><Text fontSize="sm">{c.whatsappNumber}</Text></HStack></Td>
                   <Td fontSize="sm">{c.college}</Td>
                   <Td fontSize="sm">{c.branch || "—"}</Td>
+                  <Td fontSize="xs" whiteSpace="nowrap">{c.rrn || "—"}</Td>
                   <Td><Tooltip label={c.email}><Text fontSize="xs" noOfLines={1} maxW="140px" color="night.500">{c.email}</Text></Tooltip></Td>
                   <Td>{c.attendance ? <CheckCircleIcon color="green.400" /> : <WarningIcon color="gray.300" />}</Td>
                   <Td><Tag size="sm" colorScheme={c.slot?.toLowerCase().includes('morning') ? 'teal' : c.slot?.toLowerCase().includes('evening') ? 'orange' : 'gray'}>{c.slot || "—"}</Tag></Td>
@@ -108,7 +109,7 @@ const AttendanceList = () => {
                   <Td fontSize="xs" color="night.400" whiteSpace="nowrap">{c.registrationDate ? new Date(c.registrationDate).toLocaleDateString() : "—"}</Td>
                 </Tr>
               ))}
-              {filteredData.length === 0 && <Tr><Td colSpan={11}><Text color="night.300" textAlign="center" py={10} fontSize="sm">No attendance records found.</Text></Td></Tr>}
+              {filteredData.length === 0 && <Tr><Td colSpan={12}><Text color="night.300" textAlign="center" py={10} fontSize="sm">No attendance records found.</Text></Td></Tr>}
             </Tbody>
           </Table>
         </Box>
