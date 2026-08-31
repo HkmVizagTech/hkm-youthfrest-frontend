@@ -1,8 +1,8 @@
 import { API_HOST } from "./config";
 import React, { useState } from "react";
-import { Box, Button, FormControl, FormLabel, Input, InputGroup, InputLeftAddon, FormErrorMessage, Text, Flex, Link } from "@chakra-ui/react";
+import { Box, Button, FormControl, FormLabel, Input, InputGroup, InputLeftAddon, FormErrorMessage, Text, Flex, Link, VStack } from "@chakra-ui/react";
 import { QRCodeSVG } from "qrcode.react";
-import { CheckCircle, AlertTriangle } from "lucide-react";
+import { CheckCircle, AlertTriangle, Users } from "lucide-react";
 
 const Attendence = () => {
   const [phone, setPhone] = useState("");
@@ -12,20 +12,26 @@ const Attendence = () => {
   const [attendanceToken, setAttendanceToken] = useState("");
   const [attendanceDate, setAttendanceDate] = useState("");
   const [notFound, setNotFound] = useState(false);
+  // When a WhatsApp number has more than one paid registration under it
+  // (e.g. a parent registered several kids on their own number), the
+  // backend can't guess who's checking in — it returns this list instead.
+  const [multipleCandidates, setMultipleCandidates] = useState(null);
 
-  const handleSubmit = async () => {
+  const submitAttendance = async (candidateId) => {
     setError(""); setSuccessName(""); setAttendanceToken(""); setAttendanceDate(""); setNotFound(false);
     const trimmed = phone.trim().replace(/\D/g, "");
-    if (!/^\d{10}$/.test(trimmed)) { setError("Enter a valid 10-digit number."); return; }
     setLoading(true);
     try {
       const res = await fetch(`${API_HOST}/users/mark-attendance`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ whatsappNumber: trimmed }),
+        body: JSON.stringify({ whatsappNumber: trimmed, ...(candidateId ? { candidateId } : {}) }),
       });
       const data = await res.json();
       if (res.ok) {
-        if ((data.status === "already-marked" || data.status === "success") && data.attendanceToken) {
+        if (data.status === "multiple") {
+          setMultipleCandidates(data.candidates || []);
+        } else if ((data.status === "already-marked" || data.status === "success") && data.attendanceToken) {
+          setMultipleCandidates(null);
           setAttendanceToken(data.attendanceToken); setSuccessName(data.name || ""); setAttendanceDate(data.attendanceDate || "");
         }
         if (data.status === "success") setPhone("");
@@ -35,6 +41,13 @@ const Attendence = () => {
       }
     } catch (e) { setError(e.message || "Something went wrong"); }
     setLoading(false);
+  };
+
+  const handleSubmit = async () => {
+    setMultipleCandidates(null);
+    const trimmed = phone.trim().replace(/\D/g, "");
+    if (!/^\d{10}$/.test(trimmed)) { setError("Enter a valid 10-digit number."); return; }
+    await submitAttendance();
   };
 
   return (
@@ -50,10 +63,14 @@ const Attendence = () => {
         <Box bg="cream" borderRadius="2xl" overflow="hidden" boxShadow="0 30px 60px -20px rgba(12,9,33,0.8)">
           <Box h="5px" bgGradient="linear(to-r, peacock.500, marigold.400, lotus.400)" />
           <Box px={8} py={8}>
-            <Text fontSize="xl" fontWeight={800} color="night.800" mb={2} textAlign="center">Mark attendance</Text>
-            <Text fontSize="sm" color="night.500" textAlign="center" mb={6}>Enter your WhatsApp number to check in.</Text>
+            {!multipleCandidates && (
+              <>
+                <Text fontSize="xl" fontWeight={800} color="night.800" mb={2} textAlign="center">Mark attendance</Text>
+                <Text fontSize="sm" color="night.500" textAlign="center" mb={6}>Enter your WhatsApp number to check in.</Text>
+              </>
+            )}
 
-            {!attendanceToken && (
+            {!attendanceToken && !multipleCandidates && (
               <form onSubmit={e => { e.preventDefault(); handleSubmit(); }}>
                 <FormControl isInvalid={!!error} mb={4}>
                   <FormLabel>WhatsApp Number</FormLabel>
@@ -69,6 +86,34 @@ const Attendence = () => {
                   Mark attendance
                 </Button>
               </form>
+            )}
+
+            {multipleCandidates && (
+              <Box>
+                <Flex justify="center" mb={3}><Users size={32} color="#0A7268" /></Flex>
+                <Text fontSize="lg" fontWeight={800} color="night.800" textAlign="center" mb={1}>Multiple registrations found</Text>
+                <Text fontSize="sm" color="night.500" textAlign="center" mb={5}>This number registered {multipleCandidates.length} people. Who's checking in?</Text>
+                <VStack spacing={2} align="stretch">
+                  {multipleCandidates.map((c) => (
+                    <Button
+                      key={c.id}
+                      variant="outline"
+                      justifyContent="space-between"
+                      borderColor="peacock.300"
+                      color="night.800"
+                      py={6}
+                      isLoading={loading}
+                      onClick={() => submitAttendance(c.id)}
+                      rightIcon={c.attendance ? <CheckCircle size={16} color="#0A7268" /> : undefined}
+                    >
+                      {c.name}
+                    </Button>
+                  ))}
+                </VStack>
+                <Button variant="ghost" size="sm" mt={4} w="full" onClick={() => { setMultipleCandidates(null); setPhone(""); }}>
+                  Wrong number? Start over
+                </Button>
+              </Box>
             )}
 
             {notFound && (
