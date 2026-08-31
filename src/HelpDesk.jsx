@@ -108,10 +108,10 @@ const HelpDesk = () => {
           <form onSubmit={search}>
             <HStack spacing={3} align="flex-end" wrap="wrap">
               <FormControl flex={1} minW="240px">
-                <FormLabel fontSize="xs" fontWeight={700} color="night.600">Search (RRN or phone)</FormLabel>
+                <FormLabel fontSize="xs" fontWeight={700} color="night.600">Search (RRN, phone or name)</FormLabel>
                 <InputGroup>
                   <Input
-                    placeholder="Enter RRN or phone number"
+                    placeholder="Enter RRN, phone or name"
                     size="md"
                     value={queryInput}
                     onChange={(e) => setQueryInput(e.target.value)}
