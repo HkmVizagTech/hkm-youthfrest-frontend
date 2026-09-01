@@ -28,6 +28,7 @@ const CandidateExport = () => {
   const [filteredAttendance, setFilteredAttendance] = useState("");
   const [filteredYear, setFilteredYear] = useState("");
   const [filteredPaymentMethod, setFilteredPaymentMethod] = useState("");
+  const [filteredAccommodation, setFilteredAccommodation] = useState("");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const toast = useToast();
@@ -97,9 +98,10 @@ const CandidateExport = () => {
       : true;
     const yearMatch = filteredYear ? String(c.year) === filteredYear : true;
     const paymentMethodMatch = filteredPaymentMethod ? c.paymentMethod === filteredPaymentMethod : true;
+    const accommodationMatch = filteredAccommodation ? c.accommodationType === filteredAccommodation : true;
     const searchMatch = search.length < 2 || [c.name, c.email, c.whatsappNumber, c.college, c.companyName, c.rrn].join(" ").toLowerCase().includes(search.toLowerCase());
     return collegeMatch && filterByDate(c) && paymentMatch && genderMatch && slotMatch
-      && typeMatch && attendanceMatch && yearMatch && paymentMethodMatch && searchMatch;
+      && typeMatch && attendanceMatch && yearMatch && paymentMethodMatch && accommodationMatch && searchMatch;
   });
 
   const uniqueColleges = [...new Set(data.map(c => c.college).filter(Boolean))];
@@ -109,19 +111,19 @@ const CandidateExport = () => {
 
   const hasActiveFilters = filteredCollege || startDate || endDate || filteredPaymentStatus
     || filteredGender || filteredSlot || filteredType || filteredAttendance || filteredYear
-    || filteredPaymentMethod || search;
+    || filteredPaymentMethod || filteredAccommodation || search;
 
   const clearFilters = () => {
     setFilteredCollege(""); setStartDate(""); setEndDate(""); setFilteredPaymentStatus("");
     setFilteredGender(""); setFilteredSlot(""); setFilteredType(""); setFilteredAttendance("");
-    setFilteredYear(""); setFilteredPaymentMethod(""); setSearch("");
+    setFilteredYear(""); setFilteredPaymentMethod(""); setFilteredAccommodation(""); setSearch("");
   };
 
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(filteredData.map(r => ({
       "S.No": r.serialNo, Name: r.name, Gender: r.gender, Email: r.email,
       College: r.college, "Company Name": r.companyName, Course: r.course,
-      "College/Working": r.collegeOrWorking, Year: r.year, Phone: r.whatsappNumber,
+      "College/Working": r.collegeOrWorking, "Hosteller/Day Scholar": r.accommodationType, Year: r.year, Phone: r.whatsappNumber,
       Slot: r.slot, "Order ID": r.orderId, "Payment Amount": r.paymentAmount,
       "Payment Date": r.paymentDate ? new Date(r.paymentDate).toLocaleString() : "",
       "Payment Status": r.paymentStatus, "Payment Method": r.paymentMethod, "RRN": r.rrn || "",
@@ -197,6 +199,11 @@ const CandidateExport = () => {
                 <option value="College">College</option><option value="Working">Working</option>
               </Select>
             </FormControl>
+            <FormControl w="140px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">Hosteller / Day Scholar</FormLabel>
+              <Select placeholder="All" size="sm" value={filteredAccommodation} onChange={e => setFilteredAccommodation(e.target.value)}>
+                <option value="Hosteller">Hosteller</option><option value="Day Scholar">Day Scholar</option>
+              </Select>
+            </FormControl>
             <FormControl w="110px"><FormLabel fontSize="xs" fontWeight={700} color="night.600">Year</FormLabel>
               <Select placeholder="All" size="sm" value={filteredYear} onChange={e => setFilteredYear(e.target.value)}>
                 {uniqueYears.map((y, i) => <option key={i} value={y}>{y}</option>)}
@@ -226,7 +233,7 @@ const CandidateExport = () => {
         <Box overflowX="auto" bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)">
           <Table variant="simple" size="sm">
             <Thead><Tr bg="night.50">
-              {["#","Name","Gender","Phone","College / Company","Course","Year","Reg Date","Slot","Payment","Method","RRN","Present",""].map(h => (
+              {["#","Name","Gender","Phone","College / Company","Course","Year","Hosteller/Day Scholar","Reg Date","Slot","Payment","Method","RRN","Present",""].map(h => (
                 <Th key={h} fontSize="xs" color="night.500" fontWeight={700} whiteSpace="nowrap">{h}</Th>
               ))}
             </Tr></Thead>
@@ -240,6 +247,7 @@ const CandidateExport = () => {
                   <Td fontSize="sm" color="night.700">{c.college || <chakra.span color="saffron.600">{c.companyName || "—"}</chakra.span>}</Td>
                   <Td fontSize="sm">{c.course || "—"}</Td>
                   <Td fontSize="sm">{c.year || "—"}</Td>
+                  <Td>{c.accommodationType ? <Tag size="sm" colorScheme={c.accommodationType === "Hosteller" ? "orange" : "cyan"}>{c.accommodationType}</Tag> : "—"}</Td>
                   <Td fontSize="xs" color="night.400" whiteSpace="nowrap">{c.registrationDate ? new Date(c.registrationDate).toLocaleDateString() : "—"}</Td>
                   <Td><Tag size="sm" colorScheme="purple">{c.slot}</Tag></Td>
                   <Td><Tag size="sm" colorScheme={statusColor[c.paymentStatus] || "gray"}>{c.paymentStatus}</Tag></Td>
@@ -249,7 +257,7 @@ const CandidateExport = () => {
                   <Td><IconButton aria-label="Edit candidate" icon={<EditIcon />} size="xs" variant="ghost" colorScheme="gray" onClick={() => openEdit(c)} /></Td>
                 </Tr>
               ))}
-              {filteredData.length === 0 && <Tr><Td colSpan={14}><Text color="night.300" textAlign="center" py={10} fontSize="sm">No candidates found.</Text></Td></Tr>}
+              {filteredData.length === 0 && <Tr><Td colSpan={15}><Text color="night.300" textAlign="center" py={10} fontSize="sm">No candidates found.</Text></Td></Tr>}
             </Tbody>
           </Table>
         </Box>
