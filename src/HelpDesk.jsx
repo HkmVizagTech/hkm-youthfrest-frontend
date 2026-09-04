@@ -329,9 +329,11 @@ const HelpDesk = () => {
                   </FormControl>
                   <FormControl>
                     <FormLabel fontSize="xs" fontWeight={700} color="night.600">Slot</FormLabel>
+                    {/* Evening merged into Morning on 4 Sep 2026 — walk-ins are
+                        Morning only. Kept as a Select so reinstating a second
+                        slot is a one-line change. */}
                     <Select value={onSpotForm.slot} onChange={(e) => setOnSpotForm({ ...onSpotForm, slot: e.target.value })}>
                       <option value="Morning">Morning</option>
-                      <option value="Evening">Evening</option>
                     </Select>
                   </FormControl>
                 </HStack>

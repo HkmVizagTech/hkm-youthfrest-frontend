@@ -46,9 +46,12 @@ const initialState = {
   amount: "1.00",
 };
 
+// The Evening slot was merged into the Morning one on 4 Sep 2026 — existing
+// Evening registrants were notified by WhatsApp (kp_slot_change) and no new
+// Evening registrations are accepted. The backend also coerces any stray
+// "Evening" to "Morning", so a cached copy of this bundle can't reintroduce it.
 const slotOptions = [
   { value: "Morning", label: "Morning (11AM - 1PM)" },
-  { value: "Evening", label: "Evening (5PM - 7PM)" },
 ];
 
 const RAZORPAY_KEY = "rzp_live_SJXMnvdq896pe1";
