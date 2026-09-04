@@ -42,7 +42,10 @@ const initialState = {
   course: "",
   year: "",
   dob: "",
-  slot: "",
+  // Only one slot exists now (Evening was merged into Morning), so it is
+  // pre-filled rather than asked. Keeping the field on the record means
+  // nothing downstream — validation, exports, the scanner — has to change.
+  slot: "Morning",
   amount: "1.00",
 };
 
@@ -702,19 +705,15 @@ const Main = () => {
                 </FormControl>
               )}
 
-              <FormControl isInvalid={!!errors.slot}>
-                <FormLabel>
-                  Slot <Text as="span" color="lotus.500">*</Text>
-                </FormLabel>
-                <Select
-                  options={slotOptions}
-                  value={slotOptions.find((opt) => opt.value === formData.slot)}
-                  onChange={(option) => handleInputChange("slot", option?.value || "")}
-                  placeholder="Select your slot"
-                  isClearable
-                  styles={customSelectStyles}
-                />
-                <FormErrorMessage>{errors.slot}</FormErrorMessage>
+              {/* One slot only — shown as information, not a choice. */}
+              <FormControl>
+                <FormLabel>Slot</FormLabel>
+                <Box
+                  px={4} py={3} borderWidth="1px" borderRadius="md"
+                  bg="blackAlpha.50" fontWeight={600}
+                >
+                  {slotOptions[0].label}
+                </Box>
               </FormControl>
 
               <Button onClick={handlePayment} isLoading={isSubmitting} loadingText="Processing" variant="pulse" size="lg" py={7} w="full" isDisabled={isSubmitting} type="button" mt={2} fontSize="md">
