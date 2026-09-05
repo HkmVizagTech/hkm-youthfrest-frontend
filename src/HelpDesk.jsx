@@ -1,5 +1,5 @@
 import { API_HOST } from "./config";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box, Heading, Button, Spinner, Input, Flex, Text, HStack, VStack, Badge, Tag,
   FormControl, FormLabel, Divider, useToast, InputGroup, InputRightElement, IconButton,
@@ -32,21 +32,30 @@ const HelpDesk = () => {
   const [onSpotError, setOnSpotError] = useState("");
   const [onSpotResult, setOnSpotResult] = useState(null);
 
-  const search = async (e) => {
-    e?.preventDefault();
-    const q = queryInput.trim();
-    if (!q) return;
+  const debounceTimer = useRef(null);
+  const latestQuery = useRef("");
+
+  const search = async (q) => {
+    const query = (q ?? queryInput).trim();
+    if (!query) {
+      setResults([]);
+      setSearchError("");
+      return;
+    }
+    latestQuery.current = query;
     setLoading(true);
     setSearchError("");
     try {
       const res = await axios.get(`${API_HOST}/users/help-desk/search`, {
-        params: { q },
+        params: { q: query },
         headers: authHeader(),
         timeout: 15000,
       });
+      if (latestQuery.current !== query) return;
       setResults(res.data.candidates || []);
       if (!res.data.candidates?.length) setSearchError("No candidate found for this search.");
     } catch (err) {
+      if (latestQuery.current !== query) return;
       setResults([]);
       setSearchError(err.response?.data?.message || err.message || "Search failed");
       if (err.response?.status === 401 || err.response?.status === 403) {
@@ -55,6 +64,17 @@ const HelpDesk = () => {
     }
     setLoading(false);
   };
+
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setQueryInput(value);
+    clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => search(value), 400);
+  };
+
+  useEffect(() => () => {
+    clearTimeout(debounceTimer.current);
+  }, []);
 
   const openEdit = (c) => {
     setEditTarget(c);
@@ -149,7 +169,7 @@ const HelpDesk = () => {
 
         {/* search */}
         <Box mb={4} p={4} bg="white" borderRadius="xl" boxShadow="0 1px 4px rgba(0,0,0,0.07)">
-          <form onSubmit={search}>
+          <form onSubmit={(e) => { e.preventDefault(); search(); }}>
             <HStack spacing={3} align="flex-end" wrap="wrap">
               <FormControl flex={1} minW="240px">
                 <FormLabel fontSize="xs" fontWeight={700} color="night.600">Search (UTR, phone or name)</FormLabel>
@@ -158,7 +178,7 @@ const HelpDesk = () => {
                     placeholder="Enter UTR, phone or name"
                     size="md"
                     value={queryInput}
-                    onChange={(e) => setQueryInput(e.target.value)}
+                    onChange={handleSearchInputChange}
                   />
                   <InputRightElement>
                     <IconButton aria-label="Search" icon={<SearchIcon />} size="sm" colorScheme="teal" onClick={search} />
