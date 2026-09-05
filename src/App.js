@@ -22,6 +22,7 @@ import AdminQrScanner from './AdminQrScanner';
 import AdminAttendanceScannedList from './AdminAttendanceScannedList';
 import HelpDesk from './HelpDesk';
 import MessagingStatus from './MessagingStatus';
+import Feedback from './Feedback';
 import Login from './Login';
 import Register from './Register';
 import ProtectedRoute from './component/ProtectedRoute';
@@ -33,7 +34,11 @@ function App() {
     <ChakraProvider theme={theme}>
       <Routes>
       <Route path='/' element={<Main/>}/>
-  <Route path='/send' element={<SendCertificate/>}/>
+  <Route path='/send' element={
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <SendCertificate/>
+        </ProtectedRoute>
+      }/>
       <Route path='/admin/adminqrscanner' element={
         <ProtectedRoute allowedRoles={["volunteer", "user", "admin"]}>
           <AdminQrScanner/>
@@ -69,6 +74,8 @@ function App() {
        <ThankYou />
       }/>
       <Route path='/attendance' element={<Attendence/>}/>
+      {/* Public — printed as a QR code on the venue exit banner. */}
+      <Route path='/feedback' element={<Feedback/>}/>
       <Route path='/joing' element={<JoinRedirect gender='g'/>}/>
       <Route path='/joinb' element={<JoinRedirect gender='b'/>}/>
       <Route path='/admin' element={

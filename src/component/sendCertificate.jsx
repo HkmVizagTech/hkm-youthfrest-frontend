@@ -298,7 +298,10 @@ const SendCertificate = () => {
       const response = await fetch(`${API_BASE_URL}/send-certificates`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          // Certificate sends became admin-only on 5 Sep 2026 — this page used
+          // to fire the whole batch with no authentication at all.
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(payload)
       });
@@ -343,7 +346,10 @@ const SendCertificate = () => {
       const response = await fetch(`${API_BASE_URL}/send-single-certificate`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          // Certificate sends became admin-only on 5 Sep 2026 — this page used
+          // to fire the whole batch with no authentication at all.
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ candidateId })
       });
@@ -397,7 +403,10 @@ const SendCertificate = () => {
       const response = await fetch(`${API_BASE_URL}/generate-single-certificate`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          // Certificate sends became admin-only on 5 Sep 2026 — this page used
+          // to fire the whole batch with no authentication at all.
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ candidateId })
       });
