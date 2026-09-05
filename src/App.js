@@ -21,6 +21,7 @@ import AttendanceList from './AttendanceList';
 import AdminQrScanner from './AdminQrScanner';
 import AdminAttendanceScannedList from './AdminAttendanceScannedList';
 import HelpDesk from './HelpDesk';
+import MessagingStatus from './MessagingStatus';
 import Login from './Login';
 import Register from './Register';
 import ProtectedRoute from './component/ProtectedRoute';
@@ -57,6 +58,11 @@ function App() {
       <Route path='/admin/helpdesk' element={
         <ProtectedRoute allowedRoles={["admin", "reception"]}>
           <HelpDesk/>
+        </ProtectedRoute>
+      }/>
+      <Route path='/admin/messaging' element={
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <MessagingStatus/>
         </ProtectedRoute>
       }/>
       <Route path='/thankyou/:id' element={

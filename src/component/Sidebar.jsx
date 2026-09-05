@@ -11,6 +11,7 @@ const NAV = {
     { to: "/admin/college", label: "Colleges", icon: "🏫" },
     { to: "/admin/team", label: "Team", icon: "🔐" },
     { to: "/admin/helpdesk", label: "Help Desk", icon: "🎧" },
+    { to: "/admin/messaging", label: "Messaging", icon: "📨" },
   ],
   user: [
     { to: "/admin/AdminAttendanceScannedList", label: "Scanned List", icon: "✅" },
