@@ -28,4 +28,9 @@ serviceWorker.unregister();
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+// Build marker — bumping this guarantees a genuinely new bundle hash on
+// deploy (unlike a comment, this survives minification), so any CDN layer
+// caching by filename is forced to fetch fresh content.
+window.__KP_BUILD_ID__ = "2026-09-05-blank-page-fix-2";
 // force-redeploy: cache refresh 1788617127
