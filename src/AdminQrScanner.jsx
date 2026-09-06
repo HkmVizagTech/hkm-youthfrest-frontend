@@ -16,25 +16,43 @@ const AdminQrScanner = () => {
 
   useEffect(() => {
     const codeReader = new BrowserMultiFormatReader();
-    codeReader.listVideoInputDevices().then(devices => {
-      if (!devices.length) { setError("No camera found."); return; }
-      codeReader.decodeFromVideoDevice(devices[0].deviceId, videoRef.current, async (res, err) => {
-        if (res) {
-          const scannedText = res.getText();
-          const now = Date.now();
-          if (scannedText !== lastScanRef.current.value || now - lastScanRef.current.time > 1500) {
-            lastScanRef.current = { value: scannedText, time: now };
-            setError(""); setCandidate(null); setStatus(""); setMessage("");
-            toast({ title: "QR scanned", status: "success", duration: 1500, isClosable: true, position: "top" });
-            try {
-              const r = await axios.post(`${API_HOST}/users/admin/attendance-scan`, { token: scannedText });
-              setCandidate(r.data); setStatus(r.data.status); setMessage(r.data.message);
-            } catch (e) { setError(e.response?.data?.message || e.message || "Scan error"); }
-          }
+
+    const handleResult = async (res, err) => {
+      if (res) {
+        const scannedText = res.getText();
+        const now = Date.now();
+        if (scannedText !== lastScanRef.current.value || now - lastScanRef.current.time > 1500) {
+          lastScanRef.current = { value: scannedText, time: now };
+          setError(""); setCandidate(null); setStatus(""); setMessage("");
+          toast({ title: "QR scanned", status: "success", duration: 1500, isClosable: true, position: "top" });
+          try {
+            const r = await axios.post(`${API_HOST}/users/admin/attendance-scan`, { token: scannedText });
+            setCandidate(r.data); setStatus(r.data.status); setMessage(r.data.message);
+          } catch (e) { setError(e.response?.data?.message || e.message || "Scan error"); }
         }
-        if (err && !(err instanceof NotFoundException)) setError(err.message || "Scan error");
+      }
+      if (err && !(err instanceof NotFoundException)) setError(err.message || "Scan error");
+    };
+
+    // Ask directly for the back/environment-facing camera — picking
+    // devices[0] from the enumeration list is not reliable, since device
+    // order isn't guaranteed to put the back camera first on every phone.
+    codeReader
+      .decodeFromConstraints(
+        { video: { facingMode: { exact: "environment" } } },
+        videoRef.current,
+        handleResult
+      )
+      .catch((constraintErr) => {
+        // Only reachable on a device with no back camera at all (e.g. a
+        // laptop webcam) — fall back to whatever camera is available
+        // rather than leaving the scanner completely unusable there.
+        console.warn("Back camera unavailable, falling back:", constraintErr.message);
+        codeReader
+          .decodeFromConstraints({ video: { facingMode: "environment" } }, videoRef.current, handleResult)
+          .catch((e) => setError(e.message || "Could not access any camera."));
       });
-    }).catch(e => setError(e.message));
+
     return () => codeReader.reset();
   }, [toast]);
 
