@@ -11,25 +11,43 @@ const AdminQrScanner = () => {
   const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const lastScanRef = useRef({ value: "", time: 0 });
+  const [isPaused, setIsPaused] = useState(false);
+  // A ref (not just state) so the continuously-firing decode callback reads
+  // the current paused state synchronously, without waiting on a re-render.
+  const isPausedRef = useRef(false);
   const toast = useToast();
+
+  const resumeScanning = () => {
+    isPausedRef.current = false;
+    setIsPaused(false);
+    setCandidate(null); setStatus(""); setMessage(""); setError("");
+  };
 
   useEffect(() => {
     const codeReader = new BrowserMultiFormatReader();
 
     const handleResult = async (res, err) => {
+      // Once a result is shown, ignore every further frame — a QR code
+      // held in view for more than an instant used to get re-submitted
+      // every ~1.5s, and the second submission would (correctly, but
+      // confusingly) come back "already marked" for what was really the
+      // same single scan. Scanning only resumes once the volunteer
+      // explicitly taps "Scan next".
+      if (isPausedRef.current) return;
+
       if (res) {
         const scannedText = res.getText();
-        const now = Date.now();
-        if (scannedText !== lastScanRef.current.value || now - lastScanRef.current.time > 1500) {
-          lastScanRef.current = { value: scannedText, time: now };
-          setError(""); setCandidate(null); setStatus(""); setMessage("");
-          toast({ title: "QR scanned", status: "success", duration: 1500, isClosable: true, position: "top" });
-          try {
-            const r = await axios.post(`${API_HOST}/users/admin/attendance-scan`, { token: scannedText });
-            setCandidate(r.data); setStatus(r.data.status); setMessage(r.data.message);
-          } catch (e) { setError(e.response?.data?.message || e.message || "Scan error"); }
+        isPausedRef.current = true;
+        setIsPaused(true);
+        setError(""); setCandidate(null); setStatus(""); setMessage("");
+        toast({ title: "QR scanned", status: "success", duration: 1500, isClosable: true, position: "top" });
+        try {
+          const r = await axios.post(`${API_HOST}/users/admin/attendance-scan`, { token: scannedText });
+          setCandidate(r.data); setStatus(r.data.status); setMessage(r.data.message);
+        } catch (e) {
+          setError(e.response?.data?.message || e.message || "Scan error");
         }
+        return;
       }
       if (err && !(err instanceof NotFoundException)) setError(err.message || "Scan error");
     };
@@ -79,6 +97,12 @@ const AdminQrScanner = () => {
               left: pos.endsWith("Left") ? 6 : "auto", right: pos.endsWith("Right") ? 6 : "auto",
             }} />
           ))}
+          {/* paused overlay — makes it visually obvious scanning isn't live */}
+          {isPaused && (
+            <div style={{ position: "absolute", inset: 0, borderRadius: 16, background: "rgba(12,9,33,0.35)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "white", fontWeight: 700, fontSize: 13, letterSpacing: "0.04em", textTransform: "uppercase" }}>Paused</span>
+            </div>
+          )}
         </div>
 
         {/* candidate card */}
@@ -95,16 +119,30 @@ const AdminQrScanner = () => {
         )}
 
         {/* idle state */}
-        {!candidate && !error && (
+        {!candidate && !error && !isPaused && (
           <p style={{ color: "#7E70B8", fontSize: 14, fontWeight: 500, textAlign: "center" }}>Point the camera at a participant's QR code</p>
         )}
 
         {/* error */}
         {error && (
-          <div style={{ background: "#FEE9F2", border: "2px solid #F2478B", borderRadius: 12, padding: "14px 18px", width: "100%", textAlign: "center" }}>
+          <div style={{ background: "#FEE9F2", border: "2px solid #F2478B", borderRadius: 12, padding: "14px 18px", width: "100%", textAlign: "center", marginBottom: 16 }}>
             <span style={{ fontSize: 20 }}>⚠️</span>
             <p style={{ color: "#8F1747", fontWeight: 700, marginTop: 4 }}>{error}</p>
           </div>
+        )}
+
+        {/* resume control — scanning is paused until this is tapped */}
+        {isPaused && (
+          <button
+            onClick={resumeScanning}
+            style={{
+              width: "100%", padding: "14px", borderRadius: 12, border: "none",
+              background: "#0FB6A6", color: "white", fontWeight: 800, fontSize: 15,
+              cursor: "pointer",
+            }}
+          >
+            Scan next
+          </button>
         )}
       </div>
     </Layout>

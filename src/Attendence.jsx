@@ -1,7 +1,7 @@
 import { API_HOST } from "./config";
 import React, { useState } from "react";
 import { Box, Button, FormControl, FormLabel, Input, InputGroup, InputLeftAddon, FormErrorMessage, Text, Flex, Link, VStack } from "@chakra-ui/react";
-import { QRCodeSVG } from "qrcode.react";
+import { QRCodeCanvas } from "qrcode.react";
 import { CheckCircle, AlertTriangle, Users } from "lucide-react";
 
 const Attendence = () => {
@@ -131,7 +131,7 @@ const Attendence = () => {
                 <Text fontSize="sm" color="peacock.700" fontWeight={600} mt={4} mb={4}>Show this QR at the reporting counter to collect your entry band.</Text>
                 <Flex justify="center">
                   <Box p={3} bg="white" borderRadius="xl" border="2px solid" borderColor="peacock.300">
-                    <QRCodeSVG value={attendanceToken} size={180} />
+                    <QRCodeCanvas value={attendanceToken} size={180} level="H" />
                   </Box>
                 </Flex>
                 <Text fontSize="sm" color="night.500" mt={4}>🙏 Hare Krishna! Please visit the reception / help desk.</Text>

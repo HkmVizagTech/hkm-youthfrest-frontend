@@ -8,7 +8,7 @@ import {
   Select, useDisclosure,
 } from "@chakra-ui/react";
 import { SearchIcon, EditIcon, CheckCircleIcon, WarningIcon, RepeatIcon } from "@chakra-ui/icons";
-import { QRCodeSVG } from "qrcode.react";
+import { QRCodeCanvas } from "qrcode.react";
 import axios from "axios";
 import Layout from "./component/Layout";
 
@@ -254,7 +254,7 @@ const HelpDesk = () => {
                     {c.attendanceToken ? (
                       <Flex align="center" gap={4} wrap="wrap">
                         <Box p={3} bg="white" border="1px solid" borderColor="gray.200" borderRadius="lg" display="inline-block">
-                          <QRCodeSVG value={c.attendanceToken} size={160} />
+                          <QRCodeCanvas value={c.attendanceToken} size={160} level="H" />
                         </Box>
                         <Box>
                           <Text fontSize="xs" color="night.400" fontWeight={700} textTransform="uppercase" letterSpacing="0.08em">Attendance token</Text>
@@ -404,7 +404,7 @@ const HelpDesk = () => {
                 <Text fontSize="sm" color="peacock.700" fontWeight={600} mt={4} mb={4}>Show this QR at the scanner to check in:</Text>
                 <Flex justify="center">
                   <Box p={3} bg="white" borderRadius="xl" border="2px solid" borderColor="peacock.300" display="inline-block">
-                    <QRCodeSVG value={onSpotResult.attendanceToken} size={180} />
+                    <QRCodeCanvas value={onSpotResult.attendanceToken} size={180} level="H" />
                   </Box>
                 </Flex>
                 <Text fontSize="xs" color="night.400" mt={3}>Token: {onSpotResult.attendanceToken}</Text>
