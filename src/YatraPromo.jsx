@@ -47,8 +47,13 @@ const YatraPromo = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [resending, setResending] = useState(false);
   const [templateId, setTemplateId] = useState(DEFAULT_TEMPLATE_ID);
   const [imageUrl, setImageUrl] = useState(DEFAULT_IMAGE_URL);
+  // Locked by default — these should only change when setting up a
+  // genuinely new campaign (a different event to promote), not casually
+  // edited in passing. "Edit" requires a deliberate click + confirmation.
+  const [fieldsLocked, setFieldsLocked] = useState(true);
   const pollRef = useRef(null);
 
   const load = useCallback(async () => {
@@ -68,13 +73,20 @@ const YatraPromo = () => {
     return () => clearInterval(pollRef.current);
   }, [load]);
 
+  const unlockFields = () => {
+    const confirmed = window.confirm(
+      "Only change the template ID or banner image if you're setting up a NEW campaign (e.g. promoting a different event).\n\nThis affects every future send from this page. Continue?"
+    );
+    if (confirmed) setFieldsLocked(false);
+  };
+
   const handleSend = async () => {
     if (!templateId.trim() || !imageUrl.trim()) {
       toast({ title: "Template ID and image URL are both required", status: "warning" });
       return;
     }
     const confirmed = window.confirm(
-      `Send the Yatra Clubbing promo to ${data?.eligible ?? "all"} eligible people (paid + attended)?\n\nThis cannot be undone once started.`
+      `Send the Yatra Clubbing promo to ${data?.eligible ?? "all"} eligible people who haven't received it yet (paid + attended)?\n\nThis cannot be undone once started.`
     );
     if (!confirmed) return;
 
@@ -96,6 +108,37 @@ const YatraPromo = () => {
       toast({ title: "Request failed", description: e.message, status: "error" });
     }
     setSending(false);
+  };
+
+  const handleResendAll = async () => {
+    if (!templateId.trim() || !imageUrl.trim()) {
+      toast({ title: "Template ID and image URL are both required", status: "warning" });
+      return;
+    }
+    const total = data?.totalAudience ?? "everyone";
+    const confirmed = window.confirm(
+      `⚠️ RESEND TO EVERYONE — this will message ALL ${total} eligible people again, including the ${data?.sent ?? 0} who already received it.\n\nThis is not the usual send — only do this if you mean to message everyone a second time.\n\nAre you sure?`
+    );
+    if (!confirmed) return;
+
+    setResending(true);
+    try {
+      const res = await fetch(`${API_HOST}/users/admin/send-yatra-promo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeader() },
+        body: JSON.stringify({ templateId: templateId.trim(), imageUrl: imageUrl.trim(), resendAll: true }),
+      });
+      const json = await res.json();
+      if (res.ok && json.status === "started") {
+        toast({ title: "Resend started", description: json.message, status: "success" });
+      } else {
+        toast({ title: "Could not start resend", description: json.message, status: "error" });
+      }
+      load();
+    } catch (e) {
+      toast({ title: "Request failed", description: e.message, status: "error" });
+    }
+    setResending(false);
   };
 
   const progress = data?.progress;
@@ -121,24 +164,44 @@ const YatraPromo = () => {
 
         {/* send form */}
         <Card mb={5}>
-          <Heading size="sm" color="night.800" mb={3}>Send broadcast</Heading>
+          <Flex justify="space-between" align="center" mb={3}>
+            <Heading size="sm" color="night.800">Send broadcast</Heading>
+            {fieldsLocked ? (
+              <Button size="xs" variant="ghost" onClick={unlockFields}>✏️ Edit (new campaign only)</Button>
+            ) : (
+              <Badge colorScheme="orange" borderRadius="full" px={3}>editing — remember to verify before sending</Badge>
+            )}
+          </Flex>
           <VStack spacing={3} align="stretch">
             <FormControl>
               <FormLabel fontSize="xs" fontWeight={700} color="night.600">Template ID</FormLabel>
-              <Input size="sm" value={templateId} onChange={e => setTemplateId(e.target.value)} fontFamily="mono" />
+              <Input size="sm" value={templateId} onChange={e => setTemplateId(e.target.value)} fontFamily="mono" isDisabled={fieldsLocked} bg={fieldsLocked ? "night.50" : "white"} />
             </FormControl>
             <FormControl>
               <FormLabel fontSize="xs" fontWeight={700} color="night.600">Banner image URL</FormLabel>
-              <Textarea size="sm" value={imageUrl} onChange={e => setImageUrl(e.target.value)} rows={2} fontFamily="mono" fontSize="xs" />
+              <Textarea size="sm" value={imageUrl} onChange={e => setImageUrl(e.target.value)} rows={2} fontFamily="mono" fontSize="xs" isDisabled={fieldsLocked} bg={fieldsLocked ? "night.50" : "white"} />
             </FormControl>
-            <Button
-              colorScheme="teal" onClick={handleSend}
-              isLoading={sending} loadingText="Starting…"
-              isDisabled={isRunning}
-              alignSelf="flex-start"
-            >
-              {isRunning ? `Sending… (${progress.sent}/${progress.total})` : "Send now"}
-            </Button>
+
+            <HStack spacing={3} flexWrap="wrap">
+              <Button
+                colorScheme="teal" onClick={handleSend}
+                isLoading={sending} loadingText="Starting…"
+                isDisabled={isRunning || resending}
+              >
+                {isRunning ? `Sending… (${progress.sent}/${progress.total})` : "Send now"}
+              </Button>
+              <Button
+                variant="outline" colorScheme="red" onClick={handleResendAll}
+                isLoading={resending} loadingText="Starting…"
+                isDisabled={isRunning || sending}
+              >
+                Resend to everyone
+              </Button>
+            </HStack>
+            <Text fontSize="xs" color="night.400">
+              <b>Send now</b> only reaches people who haven't gotten it yet. <b>Resend to everyone</b> messages the whole eligible list again, including anyone already sent.
+            </Text>
+
             {isRunning && (
               <Alert status="info" borderRadius="lg" fontSize="xs">
                 <AlertIcon />
