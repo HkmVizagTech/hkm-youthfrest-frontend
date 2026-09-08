@@ -22,6 +22,7 @@ import AdminQrScanner from './AdminQrScanner';
 import AdminAttendanceScannedList from './AdminAttendanceScannedList';
 import HelpDesk from './HelpDesk';
 import MessagingStatus from './MessagingStatus';
+import YatraPromo from './YatraPromo';
 import Feedback from './Feedback';
 import Login from './Login';
 import Register from './Register';
@@ -68,6 +69,11 @@ function App() {
       <Route path='/admin/messaging' element={
         <ProtectedRoute allowedRoles={["admin"]}>
           <MessagingStatus/>
+        </ProtectedRoute>
+      }/>
+      <Route path='/admin/yatra-promo' element={
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <YatraPromo/>
         </ProtectedRoute>
       }/>
       <Route path='/thankyou/:id' element={

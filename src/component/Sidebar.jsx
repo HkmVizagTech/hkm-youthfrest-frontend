@@ -12,6 +12,7 @@ const NAV = {
     { to: "/admin/team", label: "Team", icon: "🔐" },
     { to: "/admin/helpdesk", label: "Help Desk", icon: "🎧" },
     { to: "/admin/messaging", label: "Messaging", icon: "📨" },
+    { to: "/admin/yatra-promo", label: "Yatra Promo", icon: "📣" },
   ],
   user: [
     { to: "/admin/AdminAttendanceScannedList", label: "Scanned List", icon: "✅" },
